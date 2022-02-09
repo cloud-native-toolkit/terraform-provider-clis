@@ -1,11 +1,11 @@
 package gitops
 
 import (
-	"bytes"
+    "bufio"
 	"context"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"io"
 	"log"
 	"os/exec"
 )
@@ -31,7 +31,13 @@ func resourceGitopsModule() *schema.Resource {
 			},
 			"server_name": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "default",
+			},
+			"branch": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "main",
 			},
 			"layer": &schema.Schema{
 				Type:     schema.TypeString,
@@ -39,7 +45,8 @@ func resourceGitopsModule() *schema.Resource {
 			},
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "base",
 			},
 			"credentials": &schema.Schema{
 				Type:      schema.TypeString,
@@ -65,6 +72,7 @@ func resourceGitopsModuleCreate(ctx context.Context, d *schema.ResourceData, m i
 	contentDir := d.Get("content_dir").(string)
 	serverName := d.Get("server_name").(string)
 	layer := d.Get("layer").(string)
+	branch := d.Get("branch").(string)
 	moduleType := d.Get("type").(string)
 	credentials := d.Get("credentials").(string)
 	gitopsConfig := d.Get("config").(string)
@@ -77,7 +85,7 @@ func resourceGitopsModuleCreate(ctx context.Context, d *schema.ResourceData, m i
 
 	gitopsMutexKV.Lock(username)
 
-	log.Printf("Provisioning gitops module: %s, %s, %s, ", name, namespace, serverName)
+	tflog.Info(ctx, "Provisioning gitops module: name=%s, namespace=%s, serverName=%s", name, namespace, serverName)
 
 	defer gitopsMutexKV.Unlock(username)
 
@@ -90,34 +98,45 @@ func resourceGitopsModuleCreate(ctx context.Context, d *schema.ResourceData, m i
 		"--contentDir", contentDir,
 		"--serverName", serverName,
 		"--layer", layer,
+		"--branch", branch,
 		"--type", moduleType,
 		"--debug")
 
+	gitEmail := "cloudnativetoolkit@gmail.com"
+	gitName := "Cloud Native Toolkit"
+
 	updatedEnv := append(cmd.Env, "GIT_CREDENTIALS="+credentials)
 	updatedEnv = append(updatedEnv, "GITOPS_CONFIG="+gitopsConfig)
+	updatedEnv = append(updatedEnv, "EMAIL="+gitEmail)
+	updatedEnv = append(updatedEnv, "GIT_AUTHOR_EMAIL="+gitEmail)
+	updatedEnv = append(updatedEnv, "GIT_AUTHOR_NAME="+gitName)
+	updatedEnv = append(updatedEnv, "GIT_COMMITTER_EMAIL="+gitEmail)
+	updatedEnv = append(updatedEnv, "GIT_COMMITTER_NAME="+gitName)
 
 	cmd.Env = updatedEnv
 
-	var stdoutBuf, stderrBuf bytes.Buffer
-	cmd.Stdout = io.MultiWriter(log.Writer(), &stdoutBuf)
-	cmd.Stderr = io.MultiWriter(log.Writer(), &stderrBuf)
+    stdout, err := cmd.StdoutPipe()
+    if err != nil {
+        return diag.FromErr(err)
+    }
 
-	err := cmd.Run()
-	if err != nil {
+    // start the command after having set up the pipe
+    if err := cmd.Start(); err != nil {
 		return diag.FromErr(err)
-	}
+    }
+
+    // read command's stdout line by line
+    in := bufio.NewScanner(stdout)
+
+    for in.Scan() {
+        log.Printf(in.Text()) // write each line to your log, or anything you need
+    }
+
+    if err := in.Err(); err != nil {
+        log.Printf("error: %s", err)
+    }
 
 	d.SetId(namespace + ":" + name + ":" + serverName + ":" + contentDir)
-
-	err = d.Set("name", name)
-	err = d.Set("namespace", namespace)
-	err = d.Set("serverName", serverName)
-	err = d.Set("layer", layer)
-	err = d.Set("type", moduleType)
-	err = d.Set("contentDir", contentDir)
-	err = d.Set("username", username)
-	err = d.Set("credentials", credentials)
-	err = d.Set("config", gitopsConfig)
 
 	return diags
 }
@@ -146,6 +165,7 @@ func resourceGitopsModuleDelete(ctx context.Context, d *schema.ResourceData, m i
 	namespace := d.Get("namespace").(string)
 	serverName := d.Get("server_name").(string)
 	layer := d.Get("layer").(string)
+	branch := d.Get("branch").(string)
 	moduleType := d.Get("type").(string)
 	credentials := d.Get("credentials").(string)
 	gitopsConfig := d.Get("config").(string)
@@ -154,7 +174,7 @@ func resourceGitopsModuleDelete(ctx context.Context, d *schema.ResourceData, m i
 
 	gitopsMutexKV.Lock(username)
 
-	log.Printf("Destroying gitops module: %s, %s, %s, ", name, namespace, serverName)
+	tflog.Info(ctx, "Destroying gitops module: name=%s, namespace=%s, serverName=%s", name, namespace, serverName)
 
 	defer gitopsMutexKV.Unlock(username)
 
@@ -167,24 +187,41 @@ func resourceGitopsModuleDelete(ctx context.Context, d *schema.ResourceData, m i
 		"--lock", lock,
 		"--serverName", serverName,
 		"--layer", layer,
+		"--branch", branch,
 		"--type", moduleType,
 		"--debug")
 
+	gitEmail := "cloudnativetoolkit@gmail.com"
+	gitName := "Cloud Native Toolkit"
+
 	updatedEnv := append(cmd.Env, "GIT_CREDENTIALS="+credentials)
 	updatedEnv = append(updatedEnv, "GITOPS_CONFIG="+gitopsConfig)
+	updatedEnv = append(updatedEnv, "EMAIL="+gitEmail)
+	updatedEnv = append(updatedEnv, "GIT_AUTHOR_EMAIL="+gitEmail)
+	updatedEnv = append(updatedEnv, "GIT_AUTHOR_NAME="+gitName)
+	updatedEnv = append(updatedEnv, "GIT_COMMITTER_EMAIL="+gitEmail)
+	updatedEnv = append(updatedEnv, "GIT_COMMITTER_NAME="+gitName)
 
-	var stdoutBuf, stderrBuf bytes.Buffer
-	cmd.Stdout = io.MultiWriter(log.Writer(), &stdoutBuf)
-	cmd.Stderr = io.MultiWriter(log.Writer(), &stderrBuf)
+    stdout, err := cmd.StdoutPipe()
+    if err != nil {
+        return diag.FromErr(err)
+    }
 
-	err := cmd.Run()
-	if err != nil {
+    // start the command after having set up the pipe
+    if err := cmd.Start(); err != nil {
 		return diag.FromErr(err)
-	}
+    }
 
-	if err != nil {
-		return diag.FromErr(err)
-	}
+    // read command's stdout line by line
+    in := bufio.NewScanner(stdout)
+
+    for in.Scan() {
+        log.Printf(in.Text()) // write each line to your log, or anything you need
+    }
+
+    if err := in.Err(); err != nil {
+        log.Printf("error: %s", err)
+    }
 
 	d.SetId("")
 

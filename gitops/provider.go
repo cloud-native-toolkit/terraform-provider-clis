@@ -4,7 +4,7 @@ import (
 	context "context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	mutexkv "terraform-provider-hashicups/mutex"
+	mutexkv "terraform-provider-gitops/mutex"
 )
 
 var gitopsMutexKV = mutexkv.NewMutexKV()
