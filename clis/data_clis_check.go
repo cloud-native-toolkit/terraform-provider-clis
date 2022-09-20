@@ -6,6 +6,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -681,8 +682,9 @@ func setupBinary(ctx context.Context, destDir string, cliName string, url string
 		tflog.Debug(ctx, fmt.Sprintf("CLI already available: %s", destDir))
 		return false, nil
 	}
-	if fileExists(filepath.Join(destDir, cliName)) {
-		return false, nil
+	exists, err := fileExists(filepath.Join(destDir, cliName))
+	if exists || err != nil {
+		return false, err
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Downloading cli (%s) from %s", cliName, url))
@@ -878,8 +880,9 @@ func checkCurrentVersion(cli string, versionArg string, versionRegEx string) boo
 
 func createSoftLink(destDir string, cli string, linkTo string) (bool, error) {
 
-	if fileExists(filepath.Join(destDir, cli)) {
-		return false, nil
+	exists, err := fileExists(filepath.Join(destDir, cli))
+	if exists || err != nil {
+		return false, err
 	}
 
 	cliPath, err := exec.LookPath(cli)
@@ -892,10 +895,13 @@ func createSoftLink(destDir string, cli string, linkTo string) (bool, error) {
 	return true, err
 }
 
-func fileExists(filename string) bool {
-	if _, err := os.Stat(filename); err == nil {
-		return true
+func fileExists(filename string) (bool, error) {
+	_, err := os.Stat(filename)
+	if err == nil {
+		return true, nil
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false, nil
 	}
 
-	return false
+	return false, err
 }
