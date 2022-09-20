@@ -34,7 +34,7 @@ func dataClisCheck() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"clis": {
 				Type:     schema.TypeList,
-				Required: false,
+				Optional: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -42,7 +42,7 @@ func dataClisCheck() *schema.Resource {
 			},
 			"bin_dir": {
 				Type:     schema.TypeString,
-				Required: false,
+				Computed: true,
 				Default:  "bin2",
 			},
 		},
@@ -99,15 +99,25 @@ func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{
 
 	binDir := config.BinDir
 
+	err := d.Set("bin_dir", binDir)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	envContext := EnvContext{
 		Arch: runtime.GOARCH,
 		Os:   runtime.GOOS,
 	}
 
-	clis = unique(append([]string{"jq"}, clis...))
+	defaultClis := []string{"jq"}
+	if contains(clis, "kubectl") {
+		defaultClis = append(defaultClis, "oc")
+	}
+
+	clis = unique(append(defaultClis, clis...))
 
 	cliPath := os.Getenv("PATH")
-	err := os.Setenv("PATH", fmt.Sprintf("%s:%s", binDir, cliPath))
+	err = os.Setenv("PATH", fmt.Sprintf("%s:%s", binDir, cliPath))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -123,6 +133,10 @@ func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{
 }
 
 func setupNamedCli(cliName string, ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+	if cliName == "kubectl" {
+		return false, nil
+	}
+
 	installers := getInstallers()
 
 	cliMutexKV.Lock(cliName)
@@ -862,4 +876,14 @@ func createSoftLink(cli string, linkTo string) (bool, error) {
 	err = os.Symlink(cliPath, linkTo)
 
 	return true, err
+}
+
+func contains(list []string, item string) bool {
+	for _, val := range list {
+		if item == val {
+			return true
+		}
+	}
+
+	return false
 }

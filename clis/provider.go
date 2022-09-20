@@ -15,7 +15,8 @@ func Provider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"bin_dir": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "bin",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{},
