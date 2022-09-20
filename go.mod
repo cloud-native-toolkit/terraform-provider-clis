@@ -1,4 +1,4 @@
-module terraform-provider-gitops
+module terraform-provider-clis
 
 go 1.17
 

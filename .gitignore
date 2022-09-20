@@ -1,5 +1,5 @@
 .DS_Store
-terraform-provider-gitops
+terraform-provider-clis
 bin
 
 # Created by https://www.toptal.com/developers/gitignore/api/go,terraform
