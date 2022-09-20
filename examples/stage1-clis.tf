@@ -19,3 +19,14 @@ data clis_check clis {
     "gitu"
   ]
 }
+
+data clis_check clis2 {
+  clis = [
+    "yq",
+    "argocd",
+    "kubeseal",
+    "oc",
+    "kubectl"
+  ]
+  bin_dir = data.clis_check.clis.bin_dir
+}
