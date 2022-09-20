@@ -7,8 +7,6 @@ data clis_check clis {
     "helm",
     "argocd",
     "rosa",
-    "gh",
-    "glab",
     "kubeseal",
     "oc",
     "kubectl",
