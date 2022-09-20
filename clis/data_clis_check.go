@@ -220,7 +220,10 @@ func setupYq(ctx context.Context, destDir string, envContext EnvContext) (bool, 
 func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
 	cliName := "yq3"
 	if checkCurrentVersion("yq", "--version", "3[.]*") {
-		return createSoftLink("yq", path.Join(destDir, cliName))
+		return createSoftLink(destDir, "yq", path.Join(destDir, cliName))
+	}
+	if checkCurrentVersion("yq3", "--version", "3[.]*") {
+		return createSoftLink(destDir, "yq3", path.Join(destDir, cliName))
 	}
 
 	var osName string
@@ -245,7 +248,10 @@ func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool,
 func setupYq4(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
 	cliName := "yq4"
 	if checkCurrentVersion("yq", "--version", "4[.]*") {
-		return createSoftLink("yq", path.Join(destDir, cliName))
+		return createSoftLink(destDir, "yq", path.Join(destDir, cliName))
+	}
+	if checkCurrentVersion("yq4", "--version", "4[.]*") {
+		return createSoftLink(destDir, "yq4", path.Join(destDir, cliName))
 	}
 
 	var osName string
@@ -675,6 +681,9 @@ func setupBinary(ctx context.Context, destDir string, cliName string, url string
 		tflog.Debug(ctx, fmt.Sprintf("CLI already available: %s", destDir))
 		return false, nil
 	}
+	if fileExists(filepath.Join(destDir, cliName)) {
+		return false, nil
+	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Downloading cli (%s) from %s", cliName, url))
 
@@ -867,7 +876,11 @@ func checkCurrentVersion(cli string, versionArg string, versionRegEx string) boo
 	return versionRegex.MatchString(version)
 }
 
-func createSoftLink(cli string, linkTo string) (bool, error) {
+func createSoftLink(destDir string, cli string, linkTo string) (bool, error) {
+
+	if fileExists(filepath.Join(destDir, cli)) {
+		return false, nil
+	}
 
 	cliPath, err := exec.LookPath(cli)
 	if err != nil {
@@ -877,4 +890,12 @@ func createSoftLink(cli string, linkTo string) (bool, error) {
 	err = os.Symlink(cliPath, linkTo)
 
 	return true, err
+}
+
+func fileExists(filename string) bool {
+	if _, err := os.Stat(filename); err == nil {
+		return true
+	}
+
+	return false
 }
