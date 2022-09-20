@@ -28,5 +28,10 @@ data clis_check clis2 {
     "oc",
     "kubectl"
   ]
-  bin_dir = data.clis_check.clis.bin_dir
+}
+
+resource local_file output {
+  filename = "${path.cwd}/.bin_dir_out"
+
+  content = data.clis_check.clis.bin_dir
 }
