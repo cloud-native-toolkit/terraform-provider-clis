@@ -30,7 +30,7 @@ data clis_check clis2 {
   ]
 }
 
-resource local_file output {
+resource local_file bin_output {
   filename = "${path.cwd}/.bin_dir_out"
 
   content = data.clis_check.clis.bin_dir

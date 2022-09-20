@@ -98,11 +98,6 @@ func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{
 
 	binDir := config.BinDir
 
-	err := d.Set("bin_dir", binDir)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	envContext := EnvContext{
 		Arch: runtime.GOARCH,
 		Os:   runtime.GOOS,
@@ -113,17 +108,22 @@ func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{
 	clis = unique(append(defaultClis, clis...))
 
 	cliPath := os.Getenv("PATH")
-	err = os.Setenv("PATH", fmt.Sprintf("%s:%s", binDir, cliPath))
+	err := os.Setenv("PATH", fmt.Sprintf("%s:%s", binDir, cliPath))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	for _, cliName := range clis {
-		_, err := setupNamedCli(cliName, ctx, binDir, envContext)
-		if err != nil {
+		if _, err := setupNamedCli(cliName, ctx, binDir, envContext); err != nil {
 			return diag.FromErr(err)
 		}
 	}
+
+	if err = d.Set("bin_dir", binDir); err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("clis:" + strings.Join(clis[:], ":"))
 
 	return diags
 }
