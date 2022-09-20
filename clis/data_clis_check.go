@@ -694,7 +694,7 @@ func setupBinary(ctx context.Context, destDir string, cliName string, url string
 		return false, fmt.Errorf("unable to validate downloaded cli: %s", filepath.Join(destDir, cliName))
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Validation of cli successful: %s, %s", filepath.Join(destDir, cliName), outb.String())
+	tflog.Debug(ctx, fmt.Sprintf("Validation of cli successful: %s, %s", filepath.Join(destDir, cliName), outb.String()))
 
 	return true, err
 }
