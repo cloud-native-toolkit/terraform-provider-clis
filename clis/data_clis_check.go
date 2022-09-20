@@ -325,7 +325,7 @@ func setupArgoCD(ctx context.Context, destDir string, envContext EnvContext) (bo
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/argocd-%s-%s", gitOrg, gitRepo, releaseInfo.TagName, osName, arch)
 
-	return setupBinary(ctx, destDir, cliName, url, "--version", "")
+	return setupBinary(ctx, destDir, cliName, url, "version --client", "")
 }
 
 func setupRosa(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
@@ -686,10 +686,15 @@ func setupBinary(ctx context.Context, destDir string, cliName string, url string
 	tflog.Trace(ctx, fmt.Sprintf("Testing downloaded cli: %s", cliName))
 
 	cmd := exec.Command(filepath.Join(destDir, cliName), []string{testArgs}...)
+	var outb bytes.Buffer
+	cmd.Stdout = &outb
+
 	err = cmd.Run()
 	if err != nil {
-		err = fmt.Errorf("unable to validate downloaded cli: %s", cliName)
+		return false, fmt.Errorf("unable to validate downloaded cli: %s", filepath.Join(destDir, cliName))
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("Validation of cli successful: %s, %s", filepath.Join(destDir, cliName), outb.String())
 
 	return true, err
 }
