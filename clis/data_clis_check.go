@@ -686,12 +686,13 @@ func setupBinary(ctx context.Context, destDir string, cliName string, url string
 	tflog.Trace(ctx, fmt.Sprintf("Testing downloaded cli: %s", cliName))
 
 	cmd := exec.Command(filepath.Join(destDir, cliName), testArgs...)
-	var outb bytes.Buffer
+	var outb, errb bytes.Buffer
 	cmd.Stdout = &outb
+	cmd.Stderr = &errb
 
 	err = cmd.Run()
 	if err != nil {
-		return false, fmt.Errorf("unable to validate downloaded cli: %s", filepath.Join(destDir, cliName))
+		return false, fmt.Errorf("unable to validate downloaded cli: %s, %s", filepath.Join(destDir, cliName), errb.String())
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Validation of cli successful: %s, %s", filepath.Join(destDir, cliName), outb.String()))
