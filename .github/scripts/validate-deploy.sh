@@ -53,19 +53,19 @@ else
   echo "rosa cli configured properly"
 fi
 
-if ! "${BIN_DIR}/gh" version; then
-  echo "gh cli not configured properly" >&2
-  exit 1
-else
-  echo "gh cli configured properly"
-fi
+#if ! "${BIN_DIR}/gh" version; then
+#  echo "gh cli not configured properly" >&2
+#  exit 1
+#else
+#  echo "gh cli configured properly"
+#fi
 
-if ! "${BIN_DIR}/glab" version; then
-  echo "glab cli not configured properly" >&2
-  exit 1
-else
-  echo "glab cli configured properly"
-fi
+#if ! "${BIN_DIR}/glab" version; then
+#  echo "glab cli not configured properly" >&2
+#  exit 1
+#else
+#  echo "glab cli configured properly"
+#fi
 
 if ! "${BIN_DIR}/kubeseal" --version; then
   echo "kubeseal cli not configured properly" >&2
