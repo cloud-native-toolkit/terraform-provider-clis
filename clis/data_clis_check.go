@@ -220,11 +220,11 @@ func setupYq(ctx context.Context, destDir string, envContext EnvContext) (bool, 
 
 func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
 	cliName := "yq3"
-	if checkCurrentVersion("yq", "--version", "3[.]*") {
-		return createSoftLink(destDir, "yq", path.Join(destDir, cliName))
+	if checkCurrentVersion("yq", []string{"--version"}, "3[.]*") {
+		return createSymLink(destDir, "yq", path.Join(destDir, cliName))
 	}
-	if checkCurrentVersion("yq3", "--version", "3[.]*") {
-		return createSoftLink(destDir, "yq3", path.Join(destDir, cliName))
+	if checkCurrentVersion("yq3", []string{"--version"}, "3[.]*") {
+		return createSymLink(destDir, "yq3", path.Join(destDir, cliName))
 	}
 
 	var osName string
@@ -248,11 +248,11 @@ func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool,
 
 func setupYq4(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
 	cliName := "yq4"
-	if checkCurrentVersion("yq", "--version", "4[.]*") {
-		return createSoftLink(destDir, "yq", path.Join(destDir, cliName))
+	if checkCurrentVersion("yq", []string{"--version"}, "4[.]*") {
+		return createSymLink(destDir, "yq", path.Join(destDir, cliName))
 	}
-	if checkCurrentVersion("yq4", "--version", "4[.]*") {
-		return createSoftLink(destDir, "yq4", path.Join(destDir, cliName))
+	if checkCurrentVersion("yq4", []string{"--version"}, "4[.]*") {
+		return createSymLink(destDir, "yq4", path.Join(destDir, cliName))
 	}
 
 	var osName string
@@ -667,12 +667,12 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, _ st
 	// TODO check for matching cli version
 
 	tflog.Debug(ctx, fmt.Sprintf("CLI already available in PATH: %s. Creating symlink in %s", cliPath, destDir))
-	err = os.Symlink(cliPath, filepath.Join(destDir, cliName))
+	result, err := createSymLink(destDir, cliName, cliPath)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("Error creating symlink: %s", cliName))
 	}
 
-	return true
+	return result
 }
 
 func setupBinary(ctx context.Context, destDir string, cliName string, url string, testArgs []string, _ string) (bool, error) {
@@ -849,7 +849,7 @@ func extractFileFromTar(ctx context.Context, tarReader io.Reader, destDir string
 	return err
 }
 
-func checkCurrentVersion(cli string, versionArg string, versionRegEx string) bool {
+func checkCurrentVersion(ctx context.Context, cli string, versionArgs []string, versionRegEx string) bool {
 
 	cliPath, _ := exec.LookPath(cli)
 	if len(cliPath) == 0 {
@@ -857,7 +857,7 @@ func checkCurrentVersion(cli string, versionArg string, versionRegEx string) boo
 	}
 
 	// extract version string
-	cmd := exec.Command(cliPath, []string{versionArg}...)
+	cmd := exec.Command(cliPath, versionArgs...)
 	var outb bytes.Buffer
 	cmd.Stdout = &outb
 
@@ -866,8 +866,12 @@ func checkCurrentVersion(cli string, versionArg string, versionRegEx string) boo
 		return false
 	}
 
+	stdout := outb.String()
+
+	tflog.Debug(ctx, fmt.Sprintf("Found version for cli: %s, %s", cli, stdout))
+
 	r := regexp.MustCompile(`.*([0-9]+[.][0-9]+[.][0-9]+).*`)
-	matches := r.FindStringSubmatch(outb.String())
+	matches := r.FindStringSubmatch(stdout)
 	if len(matches) == 0 {
 		return false
 	}
@@ -878,7 +882,7 @@ func checkCurrentVersion(cli string, versionArg string, versionRegEx string) boo
 	return versionRegex.MatchString(version)
 }
 
-func createSoftLink(destDir string, cli string, linkTo string) (bool, error) {
+func createSymLink(destDir string, cli string, linkTo string) (bool, error) {
 
 	exists, err := fileExists(filepath.Join(destDir, cli))
 	if exists || err != nil {
