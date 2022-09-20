@@ -601,9 +601,6 @@ func setupIBMCloudOBPlugin(ctx context.Context, destDir string, _ EnvContext) (b
 
 func setupIBMCloudPlugin(ctx context.Context, destDir string, pluginName string) (bool, error) {
 
-	cliMutexKV.Lock("ibmcloud-plugin")
-	defer cliMutexKV.Unlock("ibmcloud-plugin")
-
 	if ibmcloudPluginExists(ctx, destDir, pluginName) {
 		tflog.Debug(ctx, fmt.Sprintf("Plugin already installed: %s", pluginName))
 		return false, nil
@@ -669,7 +666,7 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, _ st
 	tflog.Debug(ctx, fmt.Sprintf("CLI already available in PATH: %s. Creating symlink in %s", cliPath, destDir))
 	result, err := createSymLink(destDir, cliName, cliPath)
 	if err != nil {
-		tflog.Error(ctx, fmt.Sprintf("Error creating symlink: %s", cliName))
+		tflog.Error(ctx, fmt.Sprintf("Error creating symlink: %s, %s", cliName, err.Error()))
 	}
 
 	return result
