@@ -34,7 +34,7 @@ func dataClisCheck() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"clis": {
 				Type:     schema.TypeList,
-				Optional: false,
+				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
