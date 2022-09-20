@@ -38,7 +38,6 @@ func dataClisCheck() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Default: [...]string{"yq", "jq", "igc", "kubeseal", "oc"},
 			},
 			"bin_dir": {
 				Type:     schema.TypeString,
@@ -109,10 +108,7 @@ func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{
 		Os:   runtime.GOOS,
 	}
 
-	defaultClis := []string{"jq"}
-	if contains(clis, "kubectl") {
-		defaultClis = append(defaultClis, "oc")
-	}
+	defaultClis := []string{"yq", "jq", "igc", "kubeseal", "oc"}
 
 	clis = unique(append(defaultClis, clis...))
 
