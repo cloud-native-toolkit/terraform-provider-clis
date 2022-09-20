@@ -521,7 +521,7 @@ func setupGitu(ctx context.Context, destDir string, envContext EnvContext) (bool
 	if envContext.isArmArch() {
 		arch = "arm64"
 	} else {
-		arch = "x86"
+		arch = "x64"
 	}
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/gitu-%s-%s", gitOrg, gitRepo, releaseInfo.TagName, osName, arch)
@@ -722,7 +722,7 @@ func writeFileFromUrl(url string, destDir string, destFile string) error {
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad status retrieving file %s: %s", destFile, resp.Status)
+		return fmt.Errorf("bad status retrieving file %s from url: %s, %s", destFile, resp.Status, url)
 	}
 
 	_, err = io.Copy(out, resp.Body)
