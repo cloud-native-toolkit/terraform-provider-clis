@@ -42,7 +42,6 @@ func dataClisCheck() *schema.Resource {
 			"bin_dir": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Default:  "bin2",
 			},
 		},
 	}
