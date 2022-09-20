@@ -220,10 +220,10 @@ func setupYq(ctx context.Context, destDir string, envContext EnvContext) (bool, 
 
 func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
 	cliName := "yq3"
-	if checkCurrentVersion("yq", []string{"--version"}, "3[.]*") {
+	if checkCurrentVersion(ctx, "yq", []string{"--version"}, "3[.]*") {
 		return createSymLink(destDir, "yq", path.Join(destDir, cliName))
 	}
-	if checkCurrentVersion("yq3", []string{"--version"}, "3[.]*") {
+	if checkCurrentVersion(ctx, "yq3", []string{"--version"}, "3[.]*") {
 		return createSymLink(destDir, "yq3", path.Join(destDir, cliName))
 	}
 
@@ -248,10 +248,10 @@ func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool,
 
 func setupYq4(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
 	cliName := "yq4"
-	if checkCurrentVersion("yq", []string{"--version"}, "4[.]*") {
+	if checkCurrentVersion(ctx, "yq", []string{"--version"}, "4[.]*") {
 		return createSymLink(destDir, "yq", path.Join(destDir, cliName))
 	}
-	if checkCurrentVersion("yq4", []string{"--version"}, "4[.]*") {
+	if checkCurrentVersion(ctx, "yq4", []string{"--version"}, "4[.]*") {
 		return createSymLink(destDir, "yq4", path.Join(destDir, cliName))
 	}
 
