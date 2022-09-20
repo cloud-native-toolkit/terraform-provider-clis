@@ -167,7 +167,7 @@ func setupJq(ctx context.Context, destDir string, envContext EnvContext) (bool, 
 
 	url := fmt.Sprintf("https://github.com/stedolan/jq/releases/download/jq-1.6/%s", filename)
 
-	return setupBinary(ctx, destDir, cliName, url, "--version", "1.6")
+	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "1.6")
 }
 
 func setupIgc(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
@@ -200,7 +200,7 @@ func setupIgc(ctx context.Context, destDir string, envContext EnvContext) (bool,
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/igc-%s-%s", gitOrg, gitRepo, releaseInfo.TagName, osName, arch)
 
-	return setupBinary(ctx, destDir, cliName, url, "--version", "")
+	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
 }
 
 func setupYq(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
@@ -239,7 +239,7 @@ func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool,
 
 	url := fmt.Sprintf("https://github.com/mikefarah/yq/releases/download/3.4.1/yq_%s_%s", osName, arch)
 
-	return setupBinary(ctx, destDir, cliName, url, "--version", "")
+	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
 }
 
 func setupYq4(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
@@ -264,7 +264,7 @@ func setupYq4(ctx context.Context, destDir string, envContext EnvContext) (bool,
 
 	url := fmt.Sprintf("https://github.com/mikefarah/yq/releases/download/v4.25.2/yq_%s_%s", osName, arch)
 
-	return setupBinary(ctx, destDir, cliName, url, "--version", "")
+	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
 }
 
 func setupHelm(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
@@ -325,7 +325,7 @@ func setupArgoCD(ctx context.Context, destDir string, envContext EnvContext) (bo
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/argocd-%s-%s", gitOrg, gitRepo, releaseInfo.TagName, osName, arch)
 
-	return setupBinary(ctx, destDir, cliName, url, "version --client", "")
+	return setupBinary(ctx, destDir, cliName, url, []string{"version", "--client"}, "")
 }
 
 func setupRosa(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
@@ -466,7 +466,7 @@ func setupKubectl(ctx context.Context, destDir string, envContext EnvContext) (b
 
 	url := fmt.Sprintf("https://dl.k8s.io/release/%s/bin/%s/%s/kubectl", release, osName, arch)
 
-	return setupBinary(ctx, destDir, cliName, url, "version --client=true", "")
+	return setupBinary(ctx, destDir, cliName, url, []string{"version", "--client"}, "")
 }
 
 func setupKustomize(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
@@ -526,7 +526,7 @@ func setupGitu(ctx context.Context, destDir string, envContext EnvContext) (bool
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/gitu-%s-%s", gitOrg, gitRepo, releaseInfo.TagName, osName, arch)
 
-	return setupBinary(ctx, destDir, cliName, url, "--version", "")
+	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
 }
 
 func setupIBMCloud(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
@@ -668,7 +668,7 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, _ st
 	return true
 }
 
-func setupBinary(ctx context.Context, destDir string, cliName string, url string, testArgs string, _ string) (bool, error) {
+func setupBinary(ctx context.Context, destDir string, cliName string, url string, testArgs []string, _ string) (bool, error) {
 
 	cliPath, err := exec.LookPath(cliName)
 	if err == nil && len(cliPath) > 0 {
@@ -685,7 +685,7 @@ func setupBinary(ctx context.Context, destDir string, cliName string, url string
 
 	tflog.Trace(ctx, fmt.Sprintf("Testing downloaded cli: %s", cliName))
 
-	cmd := exec.Command(filepath.Join(destDir, cliName), []string{testArgs}...)
+	cmd := exec.Command(filepath.Join(destDir, cliName), testArgs...)
 	var outb bytes.Buffer
 	cmd.Stdout = &outb
 
@@ -876,14 +876,4 @@ func createSoftLink(cli string, linkTo string) (bool, error) {
 	err = os.Symlink(cliPath, linkTo)
 
 	return true, err
-}
-
-func contains(list []string, item string) bool {
-	for _, val := range list {
-		if item == val {
-			return true
-		}
-	}
-
-	return false
 }
