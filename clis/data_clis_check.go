@@ -18,12 +18,9 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 )
 
-var armArch = regexp.MustCompile(`^arm`)
-var macos = regexp.MustCompile(`darwin`)
 var versionedInstallRe = regexp.MustCompile("([a-z-]+)-([0-9]+[.]?[0-9]*[.]?[0-9]*)")
 var fullVersionRe = regexp.MustCompile("[0-9][.][0-9]+[.][0-9]+")
 
@@ -83,19 +80,6 @@ func getInstallers() map[string]func(ctx2 context.Context, binDir string, envCon
 	return installers
 }
 
-type EnvContext struct {
-	Arch string
-	Os   string
-}
-
-func (c EnvContext) isArmArch() bool {
-	return armArch.MatchString(c.Arch)
-}
-
-func (c EnvContext) isMacOs() bool {
-	return macos.MatchString(c.Os)
-}
-
 func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -104,11 +88,7 @@ func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{
 	config := m.(*ProviderConfig)
 
 	binDir := config.BinDir
-
-	envContext := EnvContext{
-		Arch: runtime.GOARCH,
-		Os:   runtime.GOOS,
-	}
+	envContext := config.EnvContext
 
 	defaultClis := []string{"yq", "jq", "igc", "kubeseal", "oc"}
 
@@ -214,6 +194,8 @@ func setupIgc(ctx context.Context, destDir string, envContext EnvContext, _ stri
 	var osName string
 	if envContext.isMacOs() {
 		osName = "macos"
+	} else if envContext.isAlpine() {
+		osName = "alpine"
 	} else {
 		osName = "linux"
 	}
@@ -538,7 +520,9 @@ func setupGitu(ctx context.Context, destDir string, envContext EnvContext, _ str
 
 	var osName string
 	if envContext.isMacOs() {
-		osName = "darwin"
+		osName = "macos"
+	} else if envContext.isAlpine() {
+		osName = "alpine"
 	} else {
 		osName = "linux"
 	}

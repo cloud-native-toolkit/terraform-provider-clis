@@ -1,5 +1,11 @@
 package clis
 
+import (
+	"bufio"
+	"log"
+	"os"
+)
+
 func interfacesToString(list []interface{}) []string {
 	if list == nil {
 		return nil
@@ -27,4 +33,37 @@ func unique(stringSlice []string) []string {
 		}
 	}
 	return list
+}
+
+func checkForAlpine() bool {
+	if exists, err := fileExists("/etc/os-release"); !exists || err != nil {
+		return false
+	}
+
+	file, err := os.Open("/etc/os-release")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if tmpError := file.Close(); tmpError != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	alpine := false
+	lines := bufio.NewScanner(file)
+	for lines.Scan() {
+		line := lines.Text()
+
+		if line == "ID=alpine" {
+			alpine = true
+			break
+		}
+	}
+
+	if err := lines.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return alpine
 }
