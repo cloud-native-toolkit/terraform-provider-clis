@@ -704,7 +704,7 @@ func setupGlab(ctx context.Context, destDir string, envContext EnvContext) (bool
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
 	tgzPath := "/bin/glab"
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "--version", "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "version", "")
 }
 
 func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
