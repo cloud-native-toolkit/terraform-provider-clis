@@ -1,5 +1,5 @@
 .DS_Store
-terraform-provider-hashicups
+terraform-provider-clis
 bin
 
 # Created by https://www.toptal.com/developers/gitignore/api/go,terraform
@@ -63,3 +63,6 @@ override.tf.json
 terraform.rc
 terraform
 .idea/
+goreleaser
+git_token
+git_repo

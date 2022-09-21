@@ -1,2 +1,0 @@
-git_token="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"
-git_username="cloudntivetoolkit"

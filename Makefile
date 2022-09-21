@@ -1,9 +1,9 @@
 TEST?=$$(go list ./... | grep -v 'vendor')
-HOSTNAME=hashicorp.com
-NAMESPACE=cntk
-NAME=gitops
+HOSTNAME=registry.terraform.io
+NAMESPACE=cloud-native-toolkit
+NAME=clis
 BINARY=terraform-provider-${NAME}
-VERSION=0.1
+VERSION=0.1.0
 OS_ARCH=darwin_amd64
 
 default: install
@@ -35,3 +35,6 @@ test:
 
 testacc: 
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m   
+
+docs:
+	tfplugindocs generate
