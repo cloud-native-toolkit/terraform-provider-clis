@@ -16,7 +16,9 @@ data clis_check clis {
     "ibmcloud-ks",
     "ibmcloud-cr",
     "kustomize",
-    "gitu"
+    "gitu",
+    "gh",
+    "glab"
   ]
 }
 

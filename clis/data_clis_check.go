@@ -702,7 +702,7 @@ func setupGlab(ctx context.Context, destDir string, envContext EnvContext) (bool
 	filename := fmt.Sprintf("glab_%s_%s_%s", shortRelease, osName, arch)
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
-	tgzPath := "/bin/glab"
+	tgzPath := "bin/glab"
 
 	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "--version", "")
 }
