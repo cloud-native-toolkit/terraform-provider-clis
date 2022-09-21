@@ -300,7 +300,7 @@ func setupHelm(ctx context.Context, destDir string, envContext EnvContext, _ str
 
 	url := fmt.Sprintf("https://get.helm.sh/%s", filename)
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "version", "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, []string{"version"}, "")
 }
 
 func setupArgoCD(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
@@ -358,7 +358,7 @@ func setupRosa(ctx context.Context, destDir string, envContext EnvContext, _ str
 
 	url := fmt.Sprintf("https://mirror.openshift.com/pub/openshift-v4/%s/clients/rosa/latest/rosa-%s.tar.gz", arch, osName)
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, "version", "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"version"}, "")
 }
 
 func setupKubeseal(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
@@ -393,7 +393,7 @@ func setupKubeseal(ctx context.Context, destDir string, envContext EnvContext, _
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/kubeseal-%s-%s-%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, shortRelease, osName, arch)
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, "--version", "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"--version"}, "")
 }
 
 func setupKube(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
@@ -432,7 +432,7 @@ func setupOc(ctx context.Context, destDir string, envContext EnvContext) (bool, 
 
 	url := fmt.Sprintf("https://mirror.openshift.com/pub/openshift-v4/%s/clients/ocp/stable/openshift-client-%s.tar.gz", arch, osName)
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, "version --client=true", "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"version", "--client"}, "")
 }
 
 func setupKubectl(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
@@ -501,7 +501,7 @@ func setupKustomize(ctx context.Context, destDir string, envContext EnvContext, 
 
 	url := "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.5.4/" + filename
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, "version", "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"version"}, "")
 }
 
 func setupGitu(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
@@ -574,7 +574,7 @@ func setupGh(ctx context.Context, destDir string, envContext EnvContext, _ strin
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
 	tgzPath := fmt.Sprintf("%s/bin/gh", filename)
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "--version", "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, []string{"--version"}, "")
 }
 
 func setupGlab(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
@@ -612,7 +612,7 @@ func setupGlab(ctx context.Context, destDir string, envContext EnvContext, _ str
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
 	tgzPath := "bin/glab"
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "--version", "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, []string{"--version"}, "")
 }
 
 func setupOpenShiftInstall(ctx context.Context, destDir string, envContext EnvContext, version string) (bool, error) {
@@ -644,7 +644,7 @@ func setupOpenShiftInstall(ctx context.Context, destDir string, envContext EnvCo
 		url = fmt.Sprintf("https://mirror.openshift.com/pub/openshift-v4/%s/clients/ocp/stable-%s/openshift-install-%s.tar.gz", arch, version, osName)
 	}
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, "version", "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"version"}, "")
 }
 
 func setupIBMCloud(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
@@ -680,7 +680,7 @@ func setupIBMCloud(ctx context.Context, destDir string, envContext EnvContext, _
 
 	url := fmt.Sprintf("https://download.clis.cloud.ibm.com/ibm-cloud-cli/%s/binaries/IBM_Cloud_CLI_%s_%s.tgz", shortRelease, shortRelease, osName)
 
-	result, err := setupBinaryFromTgz(ctx, destDir, cliName, url, "IBM_Cloud_CLI/ibmcloud", "version", "")
+	result, err := setupBinaryFromTgz(ctx, destDir, cliName, url, "IBM_Cloud_CLI/ibmcloud", []string{"version"}, "")
 	if err != nil {
 		return false, err
 	}
@@ -852,7 +852,7 @@ func writeFileFromUrl(url string, destDir string, destFile string) error {
 	return err
 }
 
-func setupBinaryFromTgz(ctx context.Context, destDir string, cliName string, url string, tgzPath string, testArgs string, _ string) (bool, error) {
+func setupBinaryFromTgz(ctx context.Context, destDir string, cliName string, url string, tgzPath string, testArgs []string, _ string) (bool, error) {
 
 	cliPath, err := exec.LookPath(cliName)
 	if err == nil && len(cliPath) > 0 {
@@ -866,7 +866,7 @@ func setupBinaryFromTgz(ctx context.Context, destDir string, cliName string, url
 
 	tflog.Trace(ctx, fmt.Sprintf("Testing downloaded cli: %s", cliName))
 
-	cmd := exec.Command(filepath.Join(destDir, cliName), []string{testArgs}...)
+	cmd := exec.Command(filepath.Join(destDir, cliName), testArgs...)
 	err = cmd.Run()
 	if err != nil {
 		err = fmt.Errorf("unable to validate downloaded cli: %s", cliName)
