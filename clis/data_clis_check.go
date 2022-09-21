@@ -72,6 +72,8 @@ func getInstallers() map[string]func(ctx2 context.Context, binDir string, envCon
 	installers["ibmcloud-ks"] = setupIBMCloudKSPlugin
 	installers["ibmcloud-cr"] = setupIBMCloudCRPlugin
 	installers["gitu"] = setupGitu
+	installers["gh"] = setupGh
+	installers["glab"] = setupGlab
 
 	return installers
 }
@@ -221,10 +223,10 @@ func setupYq(ctx context.Context, destDir string, envContext EnvContext) (bool, 
 func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
 	cliName := "yq3"
 	if checkCurrentVersion(ctx, "yq", []string{"--version"}, "^3[.][0-9]*") {
-		return createSymLink(destDir, "yq", path.Join(destDir, cliName))
+		return createSymLink("yq", path.Join(destDir, cliName))
 	}
 	if checkCurrentVersion(ctx, "yq3", []string{"--version"}, "^3[.][0-9]*") {
-		return createSymLink(destDir, "yq3", path.Join(destDir, cliName))
+		return createSymLink("yq3", path.Join(destDir, cliName))
 	}
 
 	var osName string
@@ -249,10 +251,10 @@ func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool,
 func setupYq4(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
 	cliName := "yq4"
 	if checkCurrentVersion(ctx, "yq", []string{"--version"}, "^4[.][0-9]*") {
-		return createSymLink(destDir, "yq", path.Join(destDir, cliName))
+		return createSymLink("yq", path.Join(destDir, cliName))
 	}
 	if checkCurrentVersion(ctx, "yq4", []string{"--version"}, "^4[.][0-9]*") {
-		return createSymLink(destDir, "yq4", path.Join(destDir, cliName))
+		return createSymLink("yq4", path.Join(destDir, cliName))
 	}
 
 	var osName string
@@ -629,6 +631,82 @@ func ibmcloudPluginExists(ctx context.Context, destDir string, pluginName string
 	return true
 }
 
+func setupGh(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+	cliName := "gh"
+	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+		return false, nil
+	}
+
+	gitOrg := "cli"
+	gitRepo := "cli"
+
+	releaseInfo, err := getLatestGitHubRelease(gitOrg, gitRepo)
+	if err != nil {
+		return false, err
+	}
+
+	shortRelease := strings.Replace(releaseInfo.TagName, "v", "", -1)
+
+	var osName string
+	if envContext.isMacOs() {
+		osName = "macOS"
+	} else {
+		osName = "linux"
+	}
+
+	var arch string
+	if envContext.isArmArch() {
+		arch = "arm64"
+	} else {
+		arch = "amd64"
+	}
+
+	filename := fmt.Sprintf("gh_%s_%s_%s", shortRelease, osName, arch)
+
+	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
+	tgzPath := fmt.Sprintf("%s/bin/gh", filename)
+
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "--version", "")
+}
+
+func setupGlab(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+	cliName := "glab"
+	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+		return false, nil
+	}
+
+	gitOrg := "profclems"
+	gitRepo := "glab"
+
+	releaseInfo, err := getLatestGitHubRelease(gitOrg, gitRepo)
+	if err != nil {
+		return false, err
+	}
+
+	shortRelease := strings.Replace(releaseInfo.TagName, "v", "", -1)
+
+	var osName string
+	if envContext.isMacOs() {
+		osName = "macOS"
+	} else {
+		osName = "Linux"
+	}
+
+	var arch string
+	if envContext.isArmArch() {
+		arch = "arm64"
+	} else {
+		arch = "x86_64"
+	}
+
+	filename := fmt.Sprintf("glab_%s_%s_%s", shortRelease, osName, arch)
+
+	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
+	tgzPath := "/bin/glab"
+
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "--version", "")
+}
+
 func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", org, repo)
@@ -664,7 +742,7 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, _ st
 	// TODO check for matching cli version
 
 	tflog.Debug(ctx, fmt.Sprintf("CLI already available in PATH: %s. Creating symlink in %s", cliPath, destDir))
-	result, err := createSymLink(destDir, cliName, filepath.Join(destDir, cliName))
+	result, err := createSymLink(cliName, filepath.Join(destDir, cliName))
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("Error creating symlink: %s, %s", cliName, err.Error()))
 	}
@@ -881,7 +959,7 @@ func checkCurrentVersion(ctx context.Context, cli string, versionArgs []string, 
 	return versionRegex.MatchString(version)
 }
 
-func createSymLink(destDir string, cli string, linkTo string) (bool, error) {
+func createSymLink(cli string, linkTo string) (bool, error) {
 
 	exists, err := fileExists(linkTo)
 	if exists || err != nil {
