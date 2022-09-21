@@ -17,11 +17,11 @@ description: |-
 
 ### Optional
 
-- `clis` (List of String)
+- `clis` (List of String) The list of clis that should be installed. Should be any of: jq, igc, yq, helm, argocd, rosa, kubeseal, oc, kustomize, ibmcloud, ibmcloud-is, ibmcloud-ob, ibmcloud-ks, ibmcloud-cr, gitu, gh, glab, openshift-install
 
 ### Read-Only
 
-- `bin_dir` (String)
+- `bin_dir` (String) The directory where the clis have been installed from the provider bin_dir config.
 - `id` (String) The ID of this resource.
 
 

@@ -14,9 +14,10 @@ func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"bin_dir": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "bin",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The directory where the clis should be installed.",
+				Default:     "bin",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{},
