@@ -881,7 +881,7 @@ func checkCurrentVersion(ctx context.Context, cli string, versionArgs []string, 
 
 func createSymLink(destDir string, cli string, linkTo string) (bool, error) {
 
-	exists, err := fileExists(filepath.Join(destDir, cli))
+	exists, err := fileExists(linkTo)
 	if exists || err != nil {
 		return false, err
 	}
@@ -889,6 +889,10 @@ func createSymLink(destDir string, cli string, linkTo string) (bool, error) {
 	cliPath, err := exec.LookPath(cli)
 	if err != nil {
 		return false, err
+	}
+
+	if cliPath == linkTo {
+		return false, nil
 	}
 
 	err = os.Symlink(cliPath, linkTo)
