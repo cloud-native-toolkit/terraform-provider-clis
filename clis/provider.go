@@ -4,10 +4,33 @@ import (
 	context "context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"regexp"
+	"runtime"
 	mutexkv "terraform-provider-clis/mutex"
 )
 
 var cliMutexKV = mutexkv.NewMutexKV()
+
+var armArch = regexp.MustCompile(`^arm`)
+var macos = regexp.MustCompile(`darwin`)
+
+type EnvContext struct {
+	Arch   string
+	Os     string
+	Alpine bool
+}
+
+func (c EnvContext) isArmArch() bool {
+	return armArch.MatchString(c.Arch)
+}
+
+func (c EnvContext) isMacOs() bool {
+	return macos.MatchString(c.Os)
+}
+
+func (c EnvContext) isAlpine() bool {
+	return c.Alpine
+}
 
 // Provider -
 func Provider() *schema.Provider {
@@ -29,7 +52,8 @@ func Provider() *schema.Provider {
 }
 
 type ProviderConfig struct {
-	BinDir string
+	BinDir     string
+	EnvContext EnvContext
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -40,6 +64,11 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 	c := &ProviderConfig{
 		BinDir: binDir,
+		EnvContext: EnvContext{
+			Arch:   runtime.GOARCH,
+			Os:     runtime.GOOS,
+			Alpine: checkForAlpine(),
+		},
 	}
 
 	return c, diags
