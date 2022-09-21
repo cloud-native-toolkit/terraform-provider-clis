@@ -18,7 +18,8 @@ data clis_check clis {
     "kustomize",
     "gitu",
     "gh",
-    "glab"
+    "glab",
+    "openshift-install-4.10"
   ]
 }
 
