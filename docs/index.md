@@ -17,4 +17,4 @@ description: |-
 
 ### Optional
 
-- `bin_dir` (String)
+- `bin_dir` (String) The directory where the clis should be installed.
