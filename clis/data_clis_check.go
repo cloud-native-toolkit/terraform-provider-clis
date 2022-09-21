@@ -24,6 +24,8 @@ import (
 
 var armArch = regexp.MustCompile(`^arm`)
 var macos = regexp.MustCompile(`darwin`)
+var versionedInstallRe = regexp.MustCompile("([a-z-]+)-([0-9]+[.]?[0-9]*[.]?[0-9]*)")
+var fullVersionRe = regexp.MustCompile("[0-9][.][0-9]+[.][0-9]+")
 
 type GitHubRelease struct {
 	TagName string `json:"tag_name"`
@@ -48,14 +50,14 @@ func dataClisCheck() *schema.Resource {
 	}
 }
 
-var installers map[string]func(ctx2 context.Context, binDir string, envContext EnvContext) (bool, error)
+var installers map[string]func(ctx2 context.Context, binDir string, envContext EnvContext, version string) (bool, error)
 
-func getInstallers() map[string]func(ctx2 context.Context, binDir string, envContext EnvContext) (bool, error) {
+func getInstallers() map[string]func(ctx2 context.Context, binDir string, envContext EnvContext, version string) (bool, error) {
 	if installers != nil {
 		return installers
 	}
 
-	installers = make(map[string]func(ctx2 context.Context, binDir string, envContext EnvContext) (bool, error))
+	installers = make(map[string]func(ctx2 context.Context, binDir string, envContext EnvContext, version string) (bool, error))
 
 	installers["jq"] = setupJq
 	installers["igc"] = setupIgc
@@ -74,6 +76,7 @@ func getInstallers() map[string]func(ctx2 context.Context, binDir string, envCon
 	installers["gitu"] = setupGitu
 	installers["gh"] = setupGh
 	installers["glab"] = setupGlab
+	installers["openshift-install"] = setupOpenShiftInstall
 
 	return installers
 }
@@ -137,6 +140,18 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 
 	installers := getInstallers()
 
+	version := ""
+	if versionedInstallRe.MatchString(cliName) {
+		nameParts := versionedInstallRe.FindStringSubmatch(cliName)
+
+		if len(nameParts) < 3 {
+			return false, fmt.Errorf("unable to parse versioned cli string: %s", cliName)
+		}
+
+		cliName = nameParts[1]
+		version = nameParts[2]
+	}
+
 	cliMutexKV.Lock(cliName)
 	defer cliMutexKV.Unlock(cliName)
 
@@ -150,10 +165,10 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 		return false, fmt.Errorf("unable to find installer for cli: %s", cliName)
 	}
 
-	return setupCli(ctx, destDir, envContext)
+	return setupCli(ctx, destDir, envContext, version)
 }
 
-func setupJq(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupJq(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "jq"
 	if cliAlreadyPresent(ctx, destDir, cliName, "1.6") {
 		return false, nil
@@ -173,7 +188,7 @@ func setupJq(ctx context.Context, destDir string, envContext EnvContext) (bool, 
 	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "1.6")
 }
 
-func setupIgc(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupIgc(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "igc"
 	if cliAlreadyPresent(ctx, destDir, cliName, "") {
 		return false, nil
@@ -206,13 +221,13 @@ func setupIgc(ctx context.Context, destDir string, envContext EnvContext) (bool,
 	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
 }
 
-func setupYq(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
-	yq3Result, err := setupYq3(ctx, destDir, envContext)
+func setupYq(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+	yq3Result, err := setupYq3(ctx, destDir, envContext, "")
 	if err != nil {
 		return false, err
 	}
 
-	yq4Result, err := setupYq4(ctx, destDir, envContext)
+	yq4Result, err := setupYq4(ctx, destDir, envContext, "")
 	if err != nil {
 		return false, err
 	}
@@ -220,7 +235,7 @@ func setupYq(ctx context.Context, destDir string, envContext EnvContext) (bool, 
 	return yq3Result || yq4Result, nil
 }
 
-func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupYq3(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "yq3"
 	if checkCurrentVersion(ctx, "yq", []string{"--version"}, "^3[.][0-9]*") {
 		return createSymLink("yq", path.Join(destDir, cliName))
@@ -248,7 +263,7 @@ func setupYq3(ctx context.Context, destDir string, envContext EnvContext) (bool,
 	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
 }
 
-func setupYq4(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupYq4(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "yq4"
 	if checkCurrentVersion(ctx, "yq", []string{"--version"}, "^4[.][0-9]*") {
 		return createSymLink("yq", path.Join(destDir, cliName))
@@ -276,7 +291,7 @@ func setupYq4(ctx context.Context, destDir string, envContext EnvContext) (bool,
 	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
 }
 
-func setupHelm(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupHelm(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "helm"
 	if cliAlreadyPresent(ctx, destDir, cliName, "") {
 		return false, nil
@@ -304,7 +319,7 @@ func setupHelm(ctx context.Context, destDir string, envContext EnvContext) (bool
 	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "version", "")
 }
 
-func setupArgoCD(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupArgoCD(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "argocd"
 	if cliAlreadyPresent(ctx, destDir, cliName, "") {
 		return false, nil
@@ -337,7 +352,7 @@ func setupArgoCD(ctx context.Context, destDir string, envContext EnvContext) (bo
 	return setupBinary(ctx, destDir, cliName, url, []string{"version", "--client"}, "")
 }
 
-func setupRosa(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupRosa(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "rosa"
 	if cliAlreadyPresent(ctx, destDir, cliName, "") {
 		return false, nil
@@ -362,7 +377,7 @@ func setupRosa(ctx context.Context, destDir string, envContext EnvContext) (bool
 	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, "version", "")
 }
 
-func setupKubeseal(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupKubeseal(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "kubeseal"
 	if cliAlreadyPresent(ctx, destDir, cliName, "") {
 		return false, nil
@@ -397,7 +412,7 @@ func setupKubeseal(ctx context.Context, destDir string, envContext EnvContext) (
 	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, "--version", "")
 }
 
-func setupKube(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupKube(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	ocResult, err := setupOc(ctx, destDir, envContext)
 	if err != nil {
 		return false, err
@@ -478,7 +493,7 @@ func setupKubectl(ctx context.Context, destDir string, envContext EnvContext) (b
 	return setupBinary(ctx, destDir, cliName, url, []string{"version", "--client"}, "")
 }
 
-func setupKustomize(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupKustomize(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "kustomize"
 	if cliAlreadyPresent(ctx, destDir, cliName, "") {
 		return false, nil
@@ -505,7 +520,7 @@ func setupKustomize(ctx context.Context, destDir string, envContext EnvContext) 
 	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, "version", "")
 }
 
-func setupGitu(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupGitu(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "gitu"
 	if cliAlreadyPresent(ctx, destDir, cliName, "") {
 		return false, nil
@@ -538,7 +553,115 @@ func setupGitu(ctx context.Context, destDir string, envContext EnvContext) (bool
 	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
 }
 
-func setupIBMCloud(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
+func setupGh(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+	cliName := "gh"
+	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+		return false, nil
+	}
+
+	gitOrg := "cli"
+	gitRepo := "cli"
+
+	releaseInfo, err := getLatestGitHubRelease(gitOrg, gitRepo)
+	if err != nil {
+		return false, err
+	}
+
+	shortRelease := strings.Replace(releaseInfo.TagName, "v", "", -1)
+
+	var osName string
+	if envContext.isMacOs() {
+		osName = "macOS"
+	} else {
+		osName = "linux"
+	}
+
+	var arch string
+	if envContext.isArmArch() {
+		arch = "arm64"
+	} else {
+		arch = "amd64"
+	}
+
+	filename := fmt.Sprintf("gh_%s_%s_%s", shortRelease, osName, arch)
+
+	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
+	tgzPath := fmt.Sprintf("%s/bin/gh", filename)
+
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "--version", "")
+}
+
+func setupGlab(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+	cliName := "glab"
+	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+		return false, nil
+	}
+
+	gitOrg := "profclems"
+	gitRepo := "glab"
+
+	releaseInfo, err := getLatestGitHubRelease(gitOrg, gitRepo)
+	if err != nil {
+		return false, err
+	}
+
+	shortRelease := strings.Replace(releaseInfo.TagName, "v", "", -1)
+
+	var osName string
+	if envContext.isMacOs() {
+		osName = "macOS"
+	} else {
+		osName = "Linux"
+	}
+
+	var arch string
+	if envContext.isArmArch() {
+		arch = "arm64"
+	} else {
+		arch = "x86_64"
+	}
+
+	filename := fmt.Sprintf("glab_%s_%s_%s", shortRelease, osName, arch)
+
+	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
+	tgzPath := "bin/glab"
+
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "--version", "")
+}
+
+func setupOpenShiftInstall(ctx context.Context, destDir string, envContext EnvContext, version string) (bool, error) {
+	cliName := "openshift-install"
+	if cliAlreadyPresent(ctx, destDir, cliName, version) {
+		return false, nil
+	}
+
+	var osName string
+	if envContext.isMacOs() {
+		osName = "mac"
+	} else {
+		osName = "linux"
+	}
+
+	var arch string
+	if envContext.isArmArch() {
+		arch = "arm64"
+	} else {
+		arch = "amd64"
+	}
+
+	var url string
+	if len(version) == 0 || version == "4" {
+		url = fmt.Sprintf("https://mirror.openshift.com/pub/openshift-v4/%s/clients/ocp/stable/openshift-install-%s.tar.gz", arch, osName)
+	} else if fullVersionRe.MatchString(version) {
+		url = fmt.Sprintf("https://mirror.openshift.com/pub/openshift-v4/%s/clients/ocp/%s/openshift-install-%s.tar.gz", arch, version, osName)
+	} else {
+		url = fmt.Sprintf("https://mirror.openshift.com/pub/openshift-v4/%s/clients/ocp/stable-%s/openshift-install-%s.tar.gz", arch, version, osName)
+	}
+
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, "version", "")
+}
+
+func setupIBMCloud(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "ibmcloud"
 	if cliAlreadyPresent(ctx, destDir, cliName, "") {
 		return false, nil
@@ -585,19 +708,19 @@ func setupIBMCloud(ctx context.Context, destDir string, envContext EnvContext) (
 	return result, err
 }
 
-func setupIBMCloudISPlugin(ctx context.Context, destDir string, _ EnvContext) (bool, error) {
+func setupIBMCloudISPlugin(ctx context.Context, destDir string, _ EnvContext, _ string) (bool, error) {
 	return setupIBMCloudPlugin(ctx, destDir, "infrastructure-service")
 }
 
-func setupIBMCloudCRPlugin(ctx context.Context, destDir string, _ EnvContext) (bool, error) {
+func setupIBMCloudCRPlugin(ctx context.Context, destDir string, _ EnvContext, _ string) (bool, error) {
 	return setupIBMCloudPlugin(ctx, destDir, "container-registry")
 }
 
-func setupIBMCloudKSPlugin(ctx context.Context, destDir string, _ EnvContext) (bool, error) {
+func setupIBMCloudKSPlugin(ctx context.Context, destDir string, _ EnvContext, _ string) (bool, error) {
 	return setupIBMCloudPlugin(ctx, destDir, "kubernetes-service")
 }
 
-func setupIBMCloudOBPlugin(ctx context.Context, destDir string, _ EnvContext) (bool, error) {
+func setupIBMCloudOBPlugin(ctx context.Context, destDir string, _ EnvContext, _ string) (bool, error) {
 	return setupIBMCloudPlugin(ctx, destDir, "observe-service")
 }
 
@@ -629,82 +752,6 @@ func ibmcloudPluginExists(ctx context.Context, destDir string, pluginName string
 	}
 
 	return true
-}
-
-func setupGh(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
-	cliName := "gh"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
-		return false, nil
-	}
-
-	gitOrg := "cli"
-	gitRepo := "cli"
-
-	releaseInfo, err := getLatestGitHubRelease(gitOrg, gitRepo)
-	if err != nil {
-		return false, err
-	}
-
-	shortRelease := strings.Replace(releaseInfo.TagName, "v", "", -1)
-
-	var osName string
-	if envContext.isMacOs() {
-		osName = "macOS"
-	} else {
-		osName = "linux"
-	}
-
-	var arch string
-	if envContext.isArmArch() {
-		arch = "arm64"
-	} else {
-		arch = "amd64"
-	}
-
-	filename := fmt.Sprintf("gh_%s_%s_%s", shortRelease, osName, arch)
-
-	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
-	tgzPath := fmt.Sprintf("%s/bin/gh", filename)
-
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "--version", "")
-}
-
-func setupGlab(ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
-	cliName := "glab"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
-		return false, nil
-	}
-
-	gitOrg := "profclems"
-	gitRepo := "glab"
-
-	releaseInfo, err := getLatestGitHubRelease(gitOrg, gitRepo)
-	if err != nil {
-		return false, err
-	}
-
-	shortRelease := strings.Replace(releaseInfo.TagName, "v", "", -1)
-
-	var osName string
-	if envContext.isMacOs() {
-		osName = "macOS"
-	} else {
-		osName = "Linux"
-	}
-
-	var arch string
-	if envContext.isArmArch() {
-		arch = "arm64"
-	} else {
-		arch = "x86_64"
-	}
-
-	filename := fmt.Sprintf("glab_%s_%s_%s", shortRelease, osName, arch)
-
-	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
-	tgzPath := "bin/glab"
-
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, "--version", "")
 }
 
 func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {

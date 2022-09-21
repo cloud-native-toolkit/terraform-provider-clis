@@ -132,9 +132,9 @@ else
   echo "gitu cli found"
 fi
 
-#if ! "${BIN_DIR}/openshift-install" version; then
-#  echo "openshift-install cli not found" >&2
-#  exit 1
-#else
-#  echo "openshift-install cli found"
-#fi
+if ! "${BIN_DIR}/openshift-install" version; then
+  echo "openshift-install cli not found" >&2
+  exit 1
+else
+  echo "openshift-install cli found"
+fi
