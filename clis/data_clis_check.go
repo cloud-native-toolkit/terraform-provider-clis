@@ -869,11 +869,11 @@ func checkCurrentVersion(ctx context.Context, cli string, versionArgs []string, 
 
 	r := regexp.MustCompile(`.*([0-9]+[.][0-9]+[.][0-9]+).*`)
 	matches := r.FindStringSubmatch(stdout)
-	if len(matches) == 0 {
+	if len(matches) < 2 {
 		return false
 	}
 
-	version := matches[0]
+	version := matches[1]
 
 	tflog.Debug(ctx, fmt.Sprintf("Found version string: %s, %s", cli, version))
 
