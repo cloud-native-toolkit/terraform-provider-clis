@@ -865,7 +865,7 @@ func checkCurrentVersion(ctx context.Context, cli string, versionArgs []string, 
 
 	stdout := outb.String()
 
-	tflog.Debug(ctx, fmt.Sprintf("Found version for cli: %s, %s", cli, stdout))
+	tflog.Debug(ctx, fmt.Sprintf("Version output for cli: %s, %s", cli, stdout))
 
 	r := regexp.MustCompile(`.*([0-9]+[.][0-9]+[.][0-9]+).*`)
 	matches := r.FindStringSubmatch(stdout)
@@ -874,6 +874,8 @@ func checkCurrentVersion(ctx context.Context, cli string, versionArgs []string, 
 	}
 
 	version := matches[0]
+
+	tflog.Debug(ctx, fmt.Sprintf("Found version string: %s, %s", cli, version))
 
 	versionRegex := regexp.MustCompile(versionRegEx)
 	return versionRegex.MatchString(version)
