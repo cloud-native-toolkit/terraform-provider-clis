@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -753,14 +754,16 @@ func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 		}
 	}()
 
-	latestUrl, err := resp.Location()
-	if err != nil {
-		return nil, fmt.Errorf("%s, %s", err.Error(), url)
-	} else if latestUrl == nil {
-		return nil, fmt.Errorf("unable to retrieve location header from url: %s", url)
+	latestUrl := resp.Header.Get("location")
+	if len(latestUrl) == 0 {
+		latestUrl = resp.Header.Get("Location")
+	}
+	if len(latestUrl) == 0 {
+		headerJson, _ := json.Marshal(resp.Header)
+		return nil, fmt.Errorf("unable to retrieve location header from url: %s, %s", url, headerJson)
 	}
 
-	latestTagMatch := regexp.MustCompile(".*/tag/(.+)").FindStringSubmatch(latestUrl.String())
+	latestTagMatch := regexp.MustCompile(".*/tag/(.+)").FindStringSubmatch(latestUrl)
 	if len(latestTagMatch) < 2 {
 		return nil, fmt.Errorf("unable to parse latest tag from url: %s", latestUrl)
 	}
