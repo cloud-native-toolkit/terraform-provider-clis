@@ -743,7 +743,7 @@ func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/latest", org, repo)
 
-	resp, err := http.Head(url)
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
