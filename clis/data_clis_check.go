@@ -744,7 +744,7 @@ func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/latest", org, repo)
 
-	resp, err := http.Get(url)
+	resp, err := http.Head(url)
 	if err != nil {
 		return nil, err
 	}
@@ -760,7 +760,9 @@ func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 	}
 	if len(latestUrl) == 0 {
 		headerJson, _ := json.Marshal(resp.Header)
-		return nil, fmt.Errorf("unable to retrieve location header from url: %s, %s", url, headerJson)
+		buf := new(strings.Builder)
+		_, err = io.Copy(buf, resp.Body)
+		return nil, fmt.Errorf("unable to retrieve location header from url: %s, %s, %s", url, headerJson, buf.String())
 	}
 
 	latestTagMatch := regexp.MustCompile(".*/tag/(.+)").FindStringSubmatch(latestUrl)
