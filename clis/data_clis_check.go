@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -742,7 +741,7 @@ func ibmcloudPluginExists(ctx context.Context, destDir string, pluginName string
 
 func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 
-	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", org, repo)
+	url := fmt.Sprintf("https://github.com/%s/%s/releases/latest", org, repo)
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -754,8 +753,18 @@ func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 		}
 	}()
 
+	latestUrl := resp.Header.Get("location")
+	if len(latestUrl) == 0 {
+		return nil, fmt.Errorf("unable to find latest release location in header response: %s", url)
+	}
+
+	latestTagMatch := regexp.MustCompile(".*/tag/(.+)").FindStringSubmatch(latestUrl)
+	if len(latestTagMatch) < 2 {
+		return nil, fmt.Errorf("unable to parse latest tag from url: %s", latestUrl)
+	}
+
 	releaseInfo := &GitHubRelease{}
-	err = json.NewDecoder(resp.Body).Decode(releaseInfo)
+	releaseInfo.TagName = latestTagMatch[1]
 
 	return releaseInfo, err
 }
