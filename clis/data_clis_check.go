@@ -755,7 +755,7 @@ func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 
 	latestUrl, err := resp.Location()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s, %s", err.Error(), url)
 	} else if latestUrl == nil {
 		return nil, fmt.Errorf("unable to retrieve location header from url: %s", url)
 	}
