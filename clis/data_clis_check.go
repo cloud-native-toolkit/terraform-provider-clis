@@ -753,12 +753,9 @@ func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 		}
 	}()
 
-	latestUrl := resp.Header.Get("location")
-	if len(latestUrl) == 0 {
-		return nil, fmt.Errorf("unable to find latest release location in header response: %s", url)
-	}
+	latestUrl, err := resp.Location()
 
-	latestTagMatch := regexp.MustCompile(".*/tag/(.+)").FindStringSubmatch(latestUrl)
+	latestTagMatch := regexp.MustCompile(".*/tag/(.+)").FindStringSubmatch(latestUrl.String())
 	if len(latestTagMatch) < 2 {
 		return nil, fmt.Errorf("unable to parse latest tag from url: %s", latestUrl)
 	}
