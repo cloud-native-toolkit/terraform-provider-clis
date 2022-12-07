@@ -50,6 +50,7 @@ func dataClisCheck() *schema.Resource {
 }
 
 var installers map[string]func(ctx2 context.Context, binDir string, envContext EnvContext, version string) (bool, error)
+var defaultVersions map[string]string
 
 func getInstallers() map[string]func(ctx2 context.Context, binDir string, envContext EnvContext, version string) (bool, error) {
 	if installers != nil {
@@ -78,6 +79,26 @@ func getInstallers() map[string]func(ctx2 context.Context, binDir string, envCon
 	installers["openshift-install"] = setupOpenShiftInstall
 
 	return installers
+}
+
+func getDefaultVersions() map[string]string {
+	if defaultVersions != nil {
+		return defaultVersions
+	}
+
+	defaultVersions = make(map[string]string)
+
+	installersMap := getInstallers()
+	// initialize with empty string
+	for k := range installersMap {
+		defaultVersions[k] = ""
+	}
+
+	defaultVersions["jq"] = "1.6"
+	defaultVersions["igc"] = "1.42.3"
+	defaultVersions["gitu"] = "1.14.7"
+
+	return defaultVersions
 }
 
 func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -134,6 +155,10 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 		version = nameParts[2]
 	}
 
+	if len(version) == 0 {
+		version = getDefaultVersions()[cliName]
+	}
+
 	cliMutexKV.Lock(cliName)
 	defer cliMutexKV.Unlock(cliName)
 
@@ -150,9 +175,9 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 	return setupCli(ctx, destDir, envContext, version)
 }
 
-func setupJq(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupJq(ctx context.Context, destDir string, envContext EnvContext, version string) (bool, error) {
 	cliName := "jq"
-	if cliAlreadyPresent(ctx, destDir, cliName, "1.6") {
+	if cliAlreadyPresent(ctx, destDir, cliName, version) {
 		return false, nil
 	}
 
@@ -167,12 +192,12 @@ func setupJq(ctx context.Context, destDir string, envContext EnvContext, _ strin
 
 	url := fmt.Sprintf("https://github.com/stedolan/jq/releases/download/jq-1.6/%s", filename)
 
-	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "1.6")
+	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, version)
 }
 
-func setupIgc(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupIgc(ctx context.Context, destDir string, envContext EnvContext, version string) (bool, error) {
 	cliName := "igc"
-	if cliAlreadyPresent(ctx, destDir, cliName, "1.42") {
+	if cliAlreadyPresent(ctx, destDir, cliName, version) {
 		return false, nil
 	}
 
