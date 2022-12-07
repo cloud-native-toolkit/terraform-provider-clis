@@ -152,7 +152,7 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 
 func setupJq(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "jq"
-	if cliAlreadyPresent(ctx, destDir, cliName, "jq-1.6") {
+	if cliAlreadyPresent(ctx, destDir, cliName, "1.6") {
 		return false, nil
 	}
 
@@ -794,7 +794,7 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minV
 		if err != nil {
 			tflog.Warn(ctx, fmt.Sprintf("Error getting cli version: %s", cliName))
 		} else {
-			versionString := strings.TrimSpace(string(out))
+			versionString := cleanVersionString(string(out))
 			if len(out) > 0 {
 				tflog.Debug(ctx, fmt.Sprintf("Found version for cli: %s, %s", cliName, versionString))
 
@@ -816,6 +816,30 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minV
 	}
 
 	return result
+}
+
+func cleanVersionString(value string) string {
+	regEx := `.*(?P<Major>\d+).(?P<Minor>\d+)[.]?(?P<Patch>\d*).*`
+	var compRegEx = regexp.MustCompile(regEx)
+	match := compRegEx.FindStringSubmatch(value)
+
+	cleanValue := ""
+	for i, _ := range compRegEx.SubexpNames() {
+		if i > 0 && i <= len(match) {
+			matchValue := match[i]
+
+			if len(matchValue) == 0 {
+				matchValue = "0"
+			}
+
+			if i > 1 {
+				cleanValue = cleanValue + "."
+			}
+			cleanValue = cleanValue + matchValue
+		}
+	}
+
+	return cleanValue
 }
 
 func setupBinary(ctx context.Context, destDir string, cliName string, url string, testArgs []string, _ string) (bool, error) {
