@@ -793,15 +793,18 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minV
 		out, err := exec.Command(cliName, "--version").Output()
 		if err != nil {
 			tflog.Warn(ctx, fmt.Sprintf("Error getting cli version: %s", cliName))
-		} else if len(out) > 0 {
-			tflog.Debug(ctx, fmt.Sprintf("Found version for cli: %s, %s", cliName, string(out)))
+		} else {
+			versionString := strings.TrimSpace(string(out))
+			if len(out) > 0 {
+				tflog.Debug(ctx, fmt.Sprintf("Found version for cli: %s, %s", cliName, versionString))
 
-			currentVersion, err1 := version.NewVersion(string(out))
-			desiredVersion, err2 := version.NewVersion(minVersion)
+				currentVersion, err1 := version.NewVersion(versionString)
+				desiredVersion, err2 := version.NewVersion(minVersion)
 
-			if err1 != nil || err2 != nil && currentVersion.LessThan(desiredVersion) {
-				tflog.Debug(ctx, fmt.Sprintf("Current cli version is earlier than required version: %s < %s", string(out), minVersion))
-				return false
+				if err1 != nil || err2 != nil && currentVersion.LessThan(desiredVersion) {
+					tflog.Debug(ctx, fmt.Sprintf("Current cli version is earlier than required version: %s < %s", versionString, minVersion))
+					return false
+				}
 			}
 		}
 	}
