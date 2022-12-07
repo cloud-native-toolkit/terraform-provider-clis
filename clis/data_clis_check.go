@@ -851,7 +851,7 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minV
 }
 
 func cleanVersionString(value string) string {
-	regEx := `.*(?P<Major>\d+).(?P<Minor>\d+)[.]?(?P<Patch>\d*).*`
+	regEx := `[^\d]*(?P<Major>\d+).(?P<Minor>\d+)[.]?(?P<Patch>\d*).*`
 	var compRegEx = regexp.MustCompile(regEx)
 	match := compRegEx.FindStringSubmatch(value)
 
