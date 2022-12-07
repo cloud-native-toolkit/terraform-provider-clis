@@ -7,10 +7,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -49,6 +51,7 @@ func dataClisCheck() *schema.Resource {
 }
 
 var installers map[string]func(ctx2 context.Context, binDir string, envContext EnvContext, version string) (bool, error)
+var defaultVersions map[string]string
 
 func getInstallers() map[string]func(ctx2 context.Context, binDir string, envContext EnvContext, version string) (bool, error) {
 	if installers != nil {
@@ -77,6 +80,26 @@ func getInstallers() map[string]func(ctx2 context.Context, binDir string, envCon
 	installers["openshift-install"] = setupOpenShiftInstall
 
 	return installers
+}
+
+func getDefaultVersions() map[string]string {
+	if defaultVersions != nil {
+		return defaultVersions
+	}
+
+	defaultVersions = make(map[string]string)
+
+	installersMap := getInstallers()
+	// initialize with empty string
+	for k := range installersMap {
+		defaultVersions[k] = ""
+	}
+
+	defaultVersions["jq"] = "1.6"
+	defaultVersions["igc"] = "1.42.3"
+	defaultVersions["gitu"] = "1.14.7"
+
+	return defaultVersions
 }
 
 func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -133,6 +156,10 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 		version = nameParts[2]
 	}
 
+	if len(version) == 0 {
+		version = getDefaultVersions()[cliName]
+	}
+
 	cliMutexKV.Lock(cliName)
 	defer cliMutexKV.Unlock(cliName)
 
@@ -149,9 +176,9 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 	return setupCli(ctx, destDir, envContext, version)
 }
 
-func setupJq(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupJq(ctx context.Context, destDir string, envContext EnvContext, version string) (bool, error) {
 	cliName := "jq"
-	if cliAlreadyPresent(ctx, destDir, cliName, "1.6") {
+	if cliAlreadyPresent(ctx, destDir, cliName, version) {
 		return false, nil
 	}
 
@@ -166,12 +193,12 @@ func setupJq(ctx context.Context, destDir string, envContext EnvContext, _ strin
 
 	url := fmt.Sprintf("https://github.com/stedolan/jq/releases/download/jq-1.6/%s", filename)
 
-	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "1.6")
+	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, version)
 }
 
-func setupIgc(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupIgc(ctx context.Context, destDir string, envContext EnvContext, version string) (bool, error) {
 	cliName := "igc"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+	if cliAlreadyPresent(ctx, destDir, cliName, version) {
 		return false, nil
 	}
 
@@ -201,7 +228,7 @@ func setupIgc(ctx context.Context, destDir string, envContext EnvContext, _ stri
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/igc-%s-%s", gitOrg, gitRepo, releaseInfo.TagName, osName, arch)
 
-	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
+	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, version)
 }
 
 func setupYq(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
@@ -274,9 +301,9 @@ func setupYq4(ctx context.Context, destDir string, envContext EnvContext, _ stri
 	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
 }
 
-func setupHelm(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupHelm(ctx context.Context, destDir string, envContext EnvContext, minVersion string) (bool, error) {
 	cliName := "helm"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
 		return false, nil
 	}
 
@@ -299,12 +326,12 @@ func setupHelm(ctx context.Context, destDir string, envContext EnvContext, _ str
 
 	url := fmt.Sprintf("https://get.helm.sh/%s", filename)
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, []string{"version"}, "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, []string{"version"}, minVersion)
 }
 
-func setupArgoCD(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupArgoCD(ctx context.Context, destDir string, envContext EnvContext, minVersion string) (bool, error) {
 	cliName := "argocd"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
 		return false, nil
 	}
 
@@ -332,12 +359,12 @@ func setupArgoCD(ctx context.Context, destDir string, envContext EnvContext, _ s
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/argocd-%s-%s", gitOrg, gitRepo, releaseInfo.TagName, osName, arch)
 
-	return setupBinary(ctx, destDir, cliName, url, []string{"version", "--client"}, "")
+	return setupBinary(ctx, destDir, cliName, url, []string{"version", "--client"}, minVersion)
 }
 
-func setupRosa(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupRosa(ctx context.Context, destDir string, envContext EnvContext, minVersion string) (bool, error) {
 	cliName := "rosa"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
 		return false, nil
 	}
 
@@ -357,12 +384,12 @@ func setupRosa(ctx context.Context, destDir string, envContext EnvContext, _ str
 
 	url := fmt.Sprintf("https://mirror.openshift.com/pub/openshift-v4/%s/clients/rosa/latest/rosa-%s.tar.gz", arch, osName)
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"version"}, "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"version"}, minVersion)
 }
 
-func setupKubeseal(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupKubeseal(ctx context.Context, destDir string, envContext EnvContext, minVersion string) (bool, error) {
 	cliName := "kubeseal"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
 		return false, nil
 	}
 
@@ -392,7 +419,7 @@ func setupKubeseal(ctx context.Context, destDir string, envContext EnvContext, _
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/kubeseal-%s-%s-%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, shortRelease, osName, arch)
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"--version"}, "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"--version"}, minVersion)
 }
 
 func setupKube(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
@@ -476,9 +503,9 @@ func setupKubectl(ctx context.Context, destDir string, envContext EnvContext) (b
 	return setupBinary(ctx, destDir, cliName, url, []string{"version", "--client"}, "")
 }
 
-func setupKustomize(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupKustomize(ctx context.Context, destDir string, envContext EnvContext, minVersion string) (bool, error) {
 	cliName := "kustomize"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
 		return false, nil
 	}
 
@@ -500,12 +527,12 @@ func setupKustomize(ctx context.Context, destDir string, envContext EnvContext, 
 
 	url := "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.5.4/" + filename
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"version"}, "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, cliName, []string{"version"}, minVersion)
 }
 
-func setupGitu(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupGitu(ctx context.Context, destDir string, envContext EnvContext, minVersion string) (bool, error) {
 	cliName := "gitu"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
 		return false, nil
 	}
 
@@ -535,12 +562,12 @@ func setupGitu(ctx context.Context, destDir string, envContext EnvContext, _ str
 
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/gitu-%s-%s", gitOrg, gitRepo, releaseInfo.TagName, osName, arch)
 
-	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, "")
+	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, minVersion)
 }
 
-func setupGh(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupGh(ctx context.Context, destDir string, envContext EnvContext, minVersion string) (bool, error) {
 	cliName := "gh"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
 		return false, nil
 	}
 
@@ -573,12 +600,12 @@ func setupGh(ctx context.Context, destDir string, envContext EnvContext, _ strin
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
 	tgzPath := fmt.Sprintf("%s/bin/gh", filename)
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, []string{"--version"}, "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, []string{"--version"}, minVersion)
 }
 
-func setupGlab(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
+func setupGlab(ctx context.Context, destDir string, envContext EnvContext, minVersion string) (bool, error) {
 	cliName := "glab"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
 		return false, nil
 	}
 
@@ -611,7 +638,7 @@ func setupGlab(ctx context.Context, destDir string, envContext EnvContext, _ str
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s.tar.gz", gitOrg, gitRepo, releaseInfo.TagName, filename)
 	tgzPath := "bin/glab"
 
-	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, []string{"--version"}, "")
+	return setupBinaryFromTgz(ctx, destDir, cliName, url, tgzPath, []string{"--version"}, minVersion)
 }
 
 func setupOpenShiftInstall(ctx context.Context, destDir string, envContext EnvContext, version string) (bool, error) {
@@ -775,7 +802,7 @@ func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 	return releaseInfo, err
 }
 
-func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, _ string) bool {
+func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minVersion string) bool {
 	cliPath, err := exec.LookPath(cliName)
 	if err != nil || len(cliPath) == 0 {
 		tflog.Debug(ctx, fmt.Sprintf("CLI not found in path: %s", cliName))
@@ -787,7 +814,31 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, _ st
 		return true
 	}
 
-	// TODO check for matching cli version
+	if len(minVersion) > 0 {
+		out, err := exec.Command(cliName, "--version").Output()
+		if err != nil {
+			tflog.Warn(ctx, fmt.Sprintf("Error getting cli version: %s", cliName))
+		} else {
+			versionString := cleanVersionString(string(out))
+			if len(out) > 0 {
+				tflog.Debug(ctx, fmt.Sprintf("Found version for cli: %s, %s", cliName, versionString))
+
+				currentVersion, err1 := version.NewVersion(versionString)
+				desiredVersion, err2 := version.NewVersion(minVersion)
+
+				if err1 != nil {
+					log.Fatal(err1)
+				} else if err2 != nil {
+					log.Fatal(err2)
+				} else if currentVersion.LessThan(desiredVersion) {
+					tflog.Debug(ctx, fmt.Sprintf("Current cli version is earlier than required version: %s < %s", versionString, minVersion))
+					return false
+				} else if currentVersion.GreaterThanOrEqual(desiredVersion) {
+					tflog.Debug(ctx, fmt.Sprintf("Current cli version is same or newer than required version: %s >= %s", versionString, minVersion))
+				}
+			}
+		}
+	}
 
 	tflog.Debug(ctx, fmt.Sprintf("CLI already available in PATH: %s. Creating symlink in %s", cliPath, destDir))
 	result, err := createSymLink(cliName, filepath.Join(destDir, cliName))
@@ -798,13 +849,36 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, _ st
 	return result
 }
 
-func setupBinary(ctx context.Context, destDir string, cliName string, url string, testArgs []string, _ string) (bool, error) {
+func cleanVersionString(value string) string {
+	regEx := `[^\d]*(?P<Major>\d+).(?P<Minor>\d+)[.]?(?P<Patch>\d*).*`
+	var compRegEx = regexp.MustCompile(regEx)
+	match := compRegEx.FindStringSubmatch(value)
 
-	cliPath, err := exec.LookPath(cliName)
-	if err == nil && len(cliPath) > 0 {
-		tflog.Debug(ctx, fmt.Sprintf("CLI already available: %s", destDir))
+	cleanValue := ""
+	for i, _ := range compRegEx.SubexpNames() {
+		if i > 0 && i <= len(match) {
+			matchValue := match[i]
+
+			if len(matchValue) == 0 {
+				matchValue = "0"
+			}
+
+			if i > 1 {
+				cleanValue = cleanValue + "."
+			}
+			cleanValue = cleanValue + matchValue
+		}
+	}
+
+	return cleanValue
+}
+
+func setupBinary(ctx context.Context, destDir string, cliName string, url string, testArgs []string, minVersion string) (bool, error) {
+
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
 		return false, nil
 	}
+
 	exists, err := fileExists(filepath.Join(destDir, cliName))
 	if exists || err != nil {
 		return false, err
