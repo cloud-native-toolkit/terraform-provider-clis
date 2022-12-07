@@ -152,7 +152,7 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 
 func setupJq(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "jq"
-	if cliAlreadyPresent(ctx, destDir, cliName, "1.6") {
+	if cliAlreadyPresent(ctx, destDir, cliName, "jq-1.6") {
 		return false, nil
 	}
 
