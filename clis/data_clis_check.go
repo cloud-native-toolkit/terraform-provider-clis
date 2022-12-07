@@ -814,7 +814,6 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minV
 		return true
 	}
 
-	// TODO check for matching cli version
 	if len(minVersion) > 0 {
 		out, err := exec.Command(cliName, "--version").Output()
 		if err != nil {
@@ -874,13 +873,12 @@ func cleanVersionString(value string) string {
 	return cleanValue
 }
 
-func setupBinary(ctx context.Context, destDir string, cliName string, url string, testArgs []string, _ string) (bool, error) {
+func setupBinary(ctx context.Context, destDir string, cliName string, url string, testArgs []string, minVersion string) (bool, error) {
 
-	cliPath, err := exec.LookPath(cliName)
-	if err == nil && len(cliPath) > 0 {
-		tflog.Debug(ctx, fmt.Sprintf("CLI already available: %s", destDir))
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
 		return false, nil
 	}
+
 	exists, err := fileExists(filepath.Join(destDir, cliName))
 	if exists || err != nil {
 		return false, err
