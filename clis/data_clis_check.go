@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -171,7 +172,7 @@ func setupJq(ctx context.Context, destDir string, envContext EnvContext, _ strin
 
 func setupIgc(ctx context.Context, destDir string, envContext EnvContext, _ string) (bool, error) {
 	cliName := "igc"
-	if cliAlreadyPresent(ctx, destDir, cliName, "") {
+	if cliAlreadyPresent(ctx, destDir, cliName, "1.42") {
 		return false, nil
 	}
 
@@ -775,7 +776,7 @@ func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 	return releaseInfo, err
 }
 
-func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, _ string) bool {
+func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minVersion string) bool {
 	cliPath, err := exec.LookPath(cliName)
 	if err != nil || len(cliPath) == 0 {
 		tflog.Debug(ctx, fmt.Sprintf("CLI not found in path: %s", cliName))
@@ -788,6 +789,22 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, _ st
 	}
 
 	// TODO check for matching cli version
+	if len(minVersion) > 0 {
+		out, err := exec.Command(cliName, "--version").Output()
+		if err != nil {
+			tflog.Warn(ctx, fmt.Sprintf("Error getting cli version: %s", cliName))
+		} else if len(out) > 0 {
+			tflog.Debug(ctx, fmt.Sprintf("Found version for cli: %s, %s", cliName, string(out)))
+
+			currentVersion, err1 := version.NewVersion(string(out))
+			desiredVersion, err2 := version.NewVersion(minVersion)
+
+			if err1 != nil || err2 != nil && currentVersion.LessThan(desiredVersion) {
+				tflog.Debug(ctx, fmt.Sprintf("Current cli version is earlier than required version: %s < %s", string(out), minVersion))
+				return false
+			}
+		}
+	}
 
 	tflog.Debug(ctx, fmt.Sprintf("CLI already available in PATH: %s. Creating symlink in %s", cliPath, destDir))
 	result, err := createSymLink(cliName, filepath.Join(destDir, cliName))
