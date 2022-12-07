@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -826,11 +827,15 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minV
 				currentVersion, err1 := version.NewVersion(versionString)
 				desiredVersion, err2 := version.NewVersion(minVersion)
 
-				if err1 != nil && err2 != nil && currentVersion.LessThan(desiredVersion) {
+				if err1 == nil && err2 == nil && currentVersion.LessThan(desiredVersion) {
 					tflog.Debug(ctx, fmt.Sprintf("Current cli version is earlier than required version: %s < %s", versionString, minVersion))
 					return false
-				} else if err1 != nil && err2 != nil && currentVersion.GreaterThanOrEqual(desiredVersion) {
+				} else if err1 == nil && err2 == nil && currentVersion.GreaterThanOrEqual(desiredVersion) {
 					tflog.Debug(ctx, fmt.Sprintf("Current cli version is same or newer than required version: %s >= %s", versionString, minVersion))
+				} else if err1 != nil {
+					log.Fatal(err1)
+				} else if err2 != nil {
+					log.Fatal(err2)
 				}
 			}
 		}
