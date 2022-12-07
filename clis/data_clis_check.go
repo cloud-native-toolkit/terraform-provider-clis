@@ -804,6 +804,8 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minV
 				if err1 != nil || err2 != nil && currentVersion.LessThan(desiredVersion) {
 					tflog.Debug(ctx, fmt.Sprintf("Current cli version is earlier than required version: %s < %s", versionString, minVersion))
 					return false
+				} else if err1 != nil && err2 != nil {
+					tflog.Debug(ctx, fmt.Sprintf("Current cli version is same or newer than required version: %s >= %s", versionString, minVersion))
 				}
 			}
 		}
