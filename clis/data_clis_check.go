@@ -7,9 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"io"
 	"log"
 	"net/http"
@@ -19,6 +16,11 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var versionedInstallRe = regexp.MustCompile("([a-z-]+)-([0-9]+[.]?[0-9]*[.]?[0-9]*)")
