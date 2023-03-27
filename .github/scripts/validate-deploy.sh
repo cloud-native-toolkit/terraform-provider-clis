@@ -138,3 +138,10 @@ if ! "${BIN_DIR}/openshift-install" version; then
 else
   echo "openshift-install cli found"
 fi
+
+if ! "${BIN_DIR}/operator-sdk" version; then
+  echo "operator-sdk cli not found" >&2
+  exit 1
+else
+  echo "operator-sdk cli found"
+fi

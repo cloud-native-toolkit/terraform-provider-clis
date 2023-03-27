@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -78,6 +77,7 @@ func getInstallers() map[string]func(ctx2 context.Context, binDir string, envCon
 	installers["gh"] = setupGh
 	installers["glab"] = setupGlab
 	installers["openshift-install"] = setupOpenShiftInstall
+	installers["operator-sdk"] = setupOperatorSdk
 
 	return installers
 }
@@ -752,6 +752,39 @@ func setupIBMCloudPlugin(ctx context.Context, destDir string, pluginName string)
 	}
 
 	return true, nil
+}
+
+func setupOperatorSdk(ctx context.Context, destDir string, envContext EnvContext, minVersion string) (bool, error) {
+	cliName := "operator-sdk"
+	if cliAlreadyPresent(ctx, destDir, cliName, minVersion) {
+		return false, nil
+	}
+
+	gitOrg := "operator-framework"
+	gitRepo := "operator-sdk"
+
+	releaseInfo, err := getLatestGitHubRelease(gitOrg, gitRepo)
+	if err != nil {
+		return false, err
+	}
+
+	var osName string
+	if envContext.isMacOs() {
+		osName = "darwin"
+	} else {
+		osName = "linux"
+	}
+
+	var arch string
+	if envContext.isArmArch() {
+		arch = "arm64"
+	} else {
+		arch = "amd64"
+	}
+
+	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/operator-sdk_%s_%s", gitOrg, gitRepo, releaseInfo.TagName, osName, arch)
+
+	return setupBinary(ctx, destDir, cliName, url, []string{"version"}, minVersion)
 }
 
 func ibmcloudPluginExists(ctx context.Context, destDir string, pluginName string) bool {
