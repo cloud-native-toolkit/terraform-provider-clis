@@ -19,7 +19,8 @@ data clis_check clis {
     "gitu",
     "gh",
     "glab",
-    "openshift-install-4.10"
+    "openshift-install-4.10",
+    "operator-sdk"
   ]
 }
 
