@@ -98,8 +98,8 @@ func getDefaultVersions() map[string]string {
 	}
 
 	defaultVersions["jq"] = "1.6"
-	defaultVersions["igc"] = "1.42.3"
-	defaultVersions["gitu"] = "1.14.7"
+	defaultVersions["igc"] = "1.48.1"
+	defaultVersions["gitu"] = "1.15.0"
 
 	return defaultVersions
 }
