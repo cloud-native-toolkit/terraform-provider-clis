@@ -875,13 +875,7 @@ func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minV
 		}
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("CLI already available in PATH: %s. Creating symlink in %s", cliPath, destDir))
-	result, err := createSymLink(cliName, filepath.Join(destDir, cliName))
-	if err != nil {
-		tflog.Error(ctx, fmt.Sprintf("Error creating symlink: %s, %s", cliName, err.Error()))
-	}
-
-	return result
+	return true
 }
 
 func cleanVersionString(value string) string {
