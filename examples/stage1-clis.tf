@@ -30,7 +30,8 @@ data clis_check clis2 {
     "argocd",
     "kubeseal",
     "oc",
-    "kubectl"
+    "kubectl",
+    "helm"
   ]
 }
 

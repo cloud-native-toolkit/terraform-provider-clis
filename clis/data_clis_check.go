@@ -118,8 +118,7 @@ func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{
 
 	clis = unique(append(defaultClis, clis...))
 
-	cliPath := os.Getenv("PATH")
-	err := os.Setenv("PATH", fmt.Sprintf("%s:%s", binDir, cliPath))
+	err := addBinDirToPath(binDir)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -137,6 +136,26 @@ func dataClisCheckRead(ctx context.Context, d *schema.ResourceData, m interface{
 	d.SetId("clis:" + strings.Join(clis[:], ":"))
 
 	return diags
+}
+
+func addBinDirToPath(binDir string) error {
+	if len(binDir) == 0 {
+		return nil
+	}
+
+	if !strings.HasPrefix(binDir, "/") {
+		cwd, err := os.Getwd()
+		if err != nil {
+			cwd = "."
+		}
+
+		binDir = path.Join(cwd, binDir)
+	}
+
+	cliPath := os.Getenv("PATH")
+	err := os.Setenv("PATH", fmt.Sprintf("%s:%s", binDir, cliPath))
+
+	return err
 }
 
 func setupNamedCli(cliName string, ctx context.Context, destDir string, envContext EnvContext) (bool, error) {
@@ -840,7 +859,7 @@ func getLatestGitHubRelease(org string, repo string) (*GitHubRelease, error) {
 func cliAlreadyPresent(ctx context.Context, destDir string, cliName string, minVersion string) bool {
 	cliPath, err := exec.LookPath(cliName)
 	if err != nil || len(cliPath) == 0 {
-		tflog.Debug(ctx, fmt.Sprintf("CLI not found in path: %s", cliName))
+		tflog.Debug(ctx, fmt.Sprintf("CLI not found in path: %s (%s)", cliName, err.Error()))
 		return false
 	}
 
@@ -980,7 +999,7 @@ func setupBinaryFromTgz(ctx context.Context, destDir string, cliName string, url
 
 	cliPath, err := exec.LookPath(cliName)
 	if err == nil && len(cliPath) > 0 {
-		tflog.Debug(ctx, fmt.Sprintf("CLI already available: %s", destDir))
+		tflog.Debug(ctx, fmt.Sprintf("CLI already available in PATH: %s", cliPath))
 		return false, nil
 	}
 
