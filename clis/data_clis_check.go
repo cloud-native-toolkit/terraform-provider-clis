@@ -143,14 +143,14 @@ func addBinDirToPath(binDir string) error {
 		return nil
 	}
 
-	if !strings.HasPrefix(binDir, "/") {
-		cwd, err := os.Getwd()
-		if err != nil {
-			cwd = "."
-		}
-
-		binDir = path.Join(cwd, binDir)
-	}
+	//if !strings.HasPrefix(binDir, "/") {
+	//	cwd, err := os.Getwd()
+	//	if err != nil {
+	//		cwd = "."
+	//	}
+	//
+	//	binDir = path.Join(cwd, binDir)
+	//}
 
 	cliPath := os.Getenv("PATH")
 	err := os.Setenv("PATH", fmt.Sprintf("%s:%s", binDir, cliPath))
