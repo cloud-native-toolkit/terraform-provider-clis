@@ -3,7 +3,7 @@ HOSTNAME=registry.terraform.io
 NAMESPACE=cloud-native-toolkit
 NAME=clis
 BINARY=terraform-provider-${NAME}
-VERSION=0.4.4
+VERSION=0.4.5
 OS_ARCH=darwin_amd64
 
 default: install
