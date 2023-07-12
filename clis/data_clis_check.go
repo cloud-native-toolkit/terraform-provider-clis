@@ -143,14 +143,14 @@ func addBinDirToPath(binDir string) error {
 		return nil
 	}
 
-	//if !strings.HasPrefix(binDir, "/") {
-	//	cwd, err := os.Getwd()
-	//	if err != nil {
-	//		cwd = "."
-	//	}
-	//
-	//	binDir = path.Join(cwd, binDir)
-	//}
+	if !strings.HasPrefix(binDir, "/") {
+		cwd, err := os.Getwd()
+		if err != nil {
+			cwd = "."
+		}
+
+		binDir = path.Join(cwd, binDir)
+	}
 
 	cliPath := os.Getenv("PATH")
 	err := os.Setenv("PATH", fmt.Sprintf("%s:%s", binDir, cliPath))
@@ -999,7 +999,7 @@ func setupBinaryFromTgz(ctx context.Context, destDir string, cliName string, url
 
 	cliPath, err := exec.LookPath(cliName)
 	if err == nil && len(cliPath) > 0 {
-		tflog.Debug(ctx, fmt.Sprintf("CLI already available: %s", destDir))
+		tflog.Debug(ctx, fmt.Sprintf("CLI already available in PATH: %s", cliPath))
 		return false, nil
 	}
 
