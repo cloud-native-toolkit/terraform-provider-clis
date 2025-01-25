@@ -1,3 +1,6 @@
+// Copyright (c) IBM
+// SPDX-License-Identifier: MPL-2.0
+
 package mutexkv
 
 import (
