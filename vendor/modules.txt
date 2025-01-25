@@ -168,7 +168,7 @@ github.com/hashicorp/terraform-plugin-framework/schema/validator
 github.com/hashicorp/terraform-plugin-framework/tfsdk
 github.com/hashicorp/terraform-plugin-framework/types
 github.com/hashicorp/terraform-plugin-framework/types/basetypes
-# github.com/hashicorp/terraform-plugin-go v0.25.0
+# github.com/hashicorp/terraform-plugin-go v0.26.0
 ## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-go/internal/logging
 github.com/hashicorp/terraform-plugin-go/tfprotov5
@@ -215,6 +215,7 @@ github.com/hashicorp/terraform-plugin-sdk/v2/terraform
 ## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-testing/compare
 github.com/hashicorp/terraform-plugin-testing/config
+github.com/hashicorp/terraform-plugin-testing/echoprovider
 github.com/hashicorp/terraform-plugin-testing/helper/resource
 github.com/hashicorp/terraform-plugin-testing/internal/addrs
 github.com/hashicorp/terraform-plugin-testing/internal/configs/configschema
@@ -229,7 +230,7 @@ github.com/hashicorp/terraform-plugin-testing/statecheck
 github.com/hashicorp/terraform-plugin-testing/terraform
 github.com/hashicorp/terraform-plugin-testing/tfjsonpath
 github.com/hashicorp/terraform-plugin-testing/tfversion
-# github.com/hashicorp/terraform-registry-address v0.2.3
+# github.com/hashicorp/terraform-registry-address v0.2.4
 ## explicit; go 1.19
 github.com/hashicorp/terraform-registry-address
 # github.com/hashicorp/terraform-svchost v0.1.1
@@ -289,7 +290,7 @@ github.com/zclconf/go-cty/cty/function/stdlib
 github.com/zclconf/go-cty/cty/gocty
 github.com/zclconf/go-cty/cty/json
 github.com/zclconf/go-cty/cty/set
-# golang.org/x/crypto v0.29.0
+# golang.org/x/crypto v0.32.0
 ## explicit; go 1.20
 golang.org/x/crypto/argon2
 golang.org/x/crypto/blake2b
@@ -302,7 +303,7 @@ golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.28.0
+# golang.org/x/net v0.34.0
 ## explicit; go 1.18
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
@@ -310,15 +311,15 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sync v0.9.0
+# golang.org/x/sync v0.10.0
 ## explicit; go 1.18
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.27.0
+# golang.org/x/sys v0.29.0
 ## explicit; go 1.18
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/text v0.20.0
+# golang.org/x/text v0.21.0
 ## explicit; go 1.18
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
@@ -357,11 +358,11 @@ google.golang.org/appengine/internal/datastore
 google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/modules
 google.golang.org/appengine/internal/remote_api
-# google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20241015192408-796eee8c2d53
 ## explicit; go 1.21
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.67.1
-## explicit; go 1.21
+# google.golang.org/grpc v1.69.4
+## explicit; go 1.22
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
@@ -369,6 +370,8 @@ google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/base
 google.golang.org/grpc/balancer/grpclb/state
 google.golang.org/grpc/balancer/pickfirst
+google.golang.org/grpc/balancer/pickfirst/internal
+google.golang.org/grpc/balancer/pickfirst/pickfirstleaf
 google.golang.org/grpc/balancer/roundrobin
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/channelz
@@ -423,7 +426,7 @@ google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
-# google.golang.org/protobuf v1.35.1
+# google.golang.org/protobuf v1.36.3
 ## explicit; go 1.21
 google.golang.org/protobuf/encoding/protojson
 google.golang.org/protobuf/encoding/prototext
@@ -446,6 +449,7 @@ google.golang.org/protobuf/internal/genid
 google.golang.org/protobuf/internal/impl
 google.golang.org/protobuf/internal/order
 google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/protolazy
 google.golang.org/protobuf/internal/set
 google.golang.org/protobuf/internal/strs
 google.golang.org/protobuf/internal/version
