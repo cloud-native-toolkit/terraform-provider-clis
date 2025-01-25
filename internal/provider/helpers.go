@@ -30,23 +30,6 @@ func (c EnvContext) isAlpine() bool {
 	return c.Alpine
 }
 
-func interfacesToString(list []interface{}) []string {
-	if list == nil {
-		return nil
-	}
-
-	result := make([]string, len(list))
-	for i, item := range list {
-		if item == nil {
-			result[i] = ""
-		} else {
-			result[i] = item.(string)
-		}
-	}
-
-	return result
-}
-
 func listTypeToStrings(list types.ListType) []string {
 
 	// Create a slice of strings to hold the values
@@ -65,10 +48,6 @@ func typeStringsToStrings(vals ...types.String) []string {
 	}
 
 	return stringArray
-}
-
-func typeStringToString(val types.String) string {
-	return val.String()
 }
 
 func first(values ...string) string {

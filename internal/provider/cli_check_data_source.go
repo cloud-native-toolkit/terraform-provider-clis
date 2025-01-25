@@ -965,7 +965,7 @@ func cleanVersionString(value string) string {
 	match := compRegEx.FindStringSubmatch(value)
 
 	cleanValue := ""
-	for i, _ := range compRegEx.SubexpNames() {
+	for i := range compRegEx.SubexpNames() {
 		if i > 0 && i <= len(match) {
 			matchValue := match[i]
 
@@ -1062,6 +1062,10 @@ func setupBinaryFromTgz(ctx context.Context, destDir string, cliName string, url
 	tflog.Debug(ctx, fmt.Sprintf("Downloading cli (%s) from %s", cliName, url))
 
 	err = extractTarGxFromUrl(ctx, url, tgzPath, destDir, cliName)
+	if err != nil {
+		err = fmt.Errorf("unable to extract tgz from url: %s", url)
+		return false, err
+	}
 
 	tflog.Trace(ctx, fmt.Sprintf("Testing downloaded cli: %s", cliName))
 
@@ -1103,7 +1107,7 @@ func extractTarGz(ctx context.Context, gzipStream io.Reader, targetFile string, 
 
 	tarReader := tar.NewReader(uncompressedStream)
 
-	for true {
+	for {
 		header, err := tarReader.Next()
 
 		if err == io.EOF {
@@ -1125,6 +1129,10 @@ func extractTarGz(ctx context.Context, gzipStream io.Reader, targetFile string, 
 
 			tflog.Debug(ctx, fmt.Sprintf("Extracting file from tgz to destination: %s -> %s", header.Name, filepath.Join(destDir, destFile)))
 			err = extractFileFromTar(ctx, tarReader, destDir, destFile)
+
+			if err != nil {
+				return err
+			}
 
 		default:
 			tflog.Error(ctx, fmt.Sprintf("unknown type: %b in %s", header.Typeflag, header.Name))
