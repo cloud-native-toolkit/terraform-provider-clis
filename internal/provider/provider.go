@@ -77,9 +77,7 @@ func (p *CliProvider) Configure(ctx context.Context, req provider.ConfigureReque
 }
 
 func (p *CliProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		NewExampleResource,
-	}
+	return []func() resource.Resource{}
 }
 
 func (p *CliProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
@@ -89,9 +87,7 @@ func (p *CliProvider) DataSources(ctx context.Context) []func() datasource.DataS
 }
 
 func (p *CliProvider) Functions(ctx context.Context) []func() function.Function {
-	return []func() function.Function{
-		NewExampleFunction,
-	}
+	return []func() function.Function{}
 }
 
 func New(version string) func() provider.Provider {
