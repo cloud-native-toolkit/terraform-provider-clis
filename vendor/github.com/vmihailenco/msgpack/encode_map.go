@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package msgpack
 
 import (
@@ -85,7 +82,7 @@ func encodeMapStringInterfaceValue(e *Encoder, v reflect.Value) error {
 
 func (e *Encoder) encodeSortedMapStringString(m map[string]string) error {
 	keys := make([]string, 0, len(m))
-	for k := range m {
+	for k, _ := range m {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
@@ -105,7 +102,7 @@ func (e *Encoder) encodeSortedMapStringString(m map[string]string) error {
 
 func (e *Encoder) encodeSortedMapStringInterface(m map[string]interface{}) error {
 	keys := make([]string, 0, len(m))
-	for k := range m {
+	for k, _ := range m {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)

@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package x25519
 
 import "github.com/cloudflare/circl/math/fp25519"

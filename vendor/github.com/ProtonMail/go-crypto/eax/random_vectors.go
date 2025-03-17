@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 // These vectors include key length in {128, 192, 256}, tag size 128, and
 // random nonce, header, and plaintext lengths.
 

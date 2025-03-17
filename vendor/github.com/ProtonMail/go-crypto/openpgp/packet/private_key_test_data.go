@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package packet
 
 // Generated with `gpg --export-secret-keys "Test Key 2"`

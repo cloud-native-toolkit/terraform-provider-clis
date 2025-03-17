@@ -192,7 +192,7 @@ func getDefaultVersions() map[string]string {
 		defaultVersions[k] = ""
 	}
 
-	defaultVersions["jq"] = "1.6"
+	defaultVersions["jq"] = "1.7.1"
 	defaultVersions["igc"] = "1.50.2"
 	defaultVersions["gitu"] = "1.15.0"
 
@@ -276,7 +276,7 @@ func setupJq(ctx context.Context, destDir string, envContext EnvContext, version
 		filename = filename + "-amd64"
 	}
 
-	url := fmt.Sprintf("https://github.com/jqlang/jq/releases/download/jq-1.7.1/%s", filename)
+	url := fmt.Sprintf("https://github.com/jqlang/jq/releases/download/jq-%s/%s", version, filename)
 
 	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, version)
 }
@@ -1002,7 +1002,7 @@ func setupBinary(ctx context.Context, destDir string, cliName string, url string
 		return false, err
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Downloading cli (%s) from %s", cliName, url))
+	tflog.Debug(ctx, fmt.Sprintf("Downloading cli (%s) from url: %s", cliName, url))
 
 	err = writeFileFromUrl(url, destDir, cliName)
 	if err != nil {

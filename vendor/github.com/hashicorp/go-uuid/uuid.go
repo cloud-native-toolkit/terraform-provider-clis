@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package uuid
 
 import (
@@ -26,6 +23,7 @@ func GenerateRandomBytesWithReader(size int, reader io.Reader) ([]byte, error) {
 	}
 	return buf, nil
 }
+
 
 const uuidLen = 16
 
@@ -60,7 +58,7 @@ func FormatUUID(buf []byte) (string, error) {
 }
 
 func ParseUUID(uuid string) ([]byte, error) {
-	if len(uuid) != 2*uuidLen+4 {
+	if len(uuid) != 2 * uuidLen + 4 {
 		return nil, fmt.Errorf("uuid string is wrong length")
 	}
 

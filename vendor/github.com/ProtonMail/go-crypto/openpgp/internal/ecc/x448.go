@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 // Package ecc implements a generic interface for ECDH, ECDSA, and EdDSA.
 package ecc
 

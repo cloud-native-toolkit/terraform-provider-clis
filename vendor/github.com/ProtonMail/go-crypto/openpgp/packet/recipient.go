@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package packet
 
 // Recipient type represents a Intended Recipient Fingerprint subpacket

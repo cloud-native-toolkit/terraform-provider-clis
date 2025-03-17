@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package packet
 
 // This file implements the pushdown automata (PDA) from PGPainless (Paul Schaub)
