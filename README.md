@@ -1,7 +1,7 @@
-# Terraform Provider Gitops
+# Terraform Provider CLIs
 
-Terraform provider to populate a Cloud Native Toolkit gitops repo with a new ArgoCD 
-application. Currently, this provider is a simple wrapper for the `gitops-namespace` 
+Terraform provider to populate a Cloud Native Toolkit gitops repo with a new ArgoCD
+application. Currently, this provider is a simple wrapper for the `gitops-namespace`
 and `gitops-module` commands in the [igc](https://github.com/cloud-native-toolkit/ibm-garage-cloud-cli) cli.
 
 The provider serves two purposes with this version:

@@ -1,5 +1,7 @@
+# Copyright (c) 2025 Cloud-Native Toolkit
+# SPDX-License-Identifier: MIT
 
-data clis_check clis {
+data "clis_check" "clis" {
   clis = [
     "yq",
     "jq",
@@ -24,7 +26,7 @@ data clis_check clis {
   ]
 }
 
-data clis_check clis2 {
+data "clis_check" "clis2" {
   clis = [
     "yq",
     "argocd",
@@ -35,7 +37,7 @@ data clis_check clis2 {
   ]
 }
 
-resource local_file bin_output {
+resource "local_file" "bin_output" {
   filename = "${path.cwd}/.bin_dir_out"
 
   content = data.clis_check.clis.bin_dir

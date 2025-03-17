@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Copyright (c) 2025 Cloud-Native Toolkit
+# SPDX-License-Identifier: MIT
 
 BIN_DIR=$(cat .bin_dir)
 
