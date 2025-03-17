@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 // line 1 "format_fsm.rl"
 // This file is generated from format_fsm.rl. DO NOT EDIT.
 

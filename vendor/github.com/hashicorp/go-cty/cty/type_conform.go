@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 package cty
 
 // TestConformance recursively walks the receiver and the given other type and

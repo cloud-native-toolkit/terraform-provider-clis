@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 // Package goldilocks provides elliptic curve operations over the goldilocks curve.
 package goldilocks
 

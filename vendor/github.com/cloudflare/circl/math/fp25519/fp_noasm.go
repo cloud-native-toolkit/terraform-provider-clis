@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 //go:build !amd64 || purego
 // +build !amd64 purego
 

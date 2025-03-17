@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 /*
 Package x448 provides Diffie-Hellman functions as specified in RFC-7748.
 

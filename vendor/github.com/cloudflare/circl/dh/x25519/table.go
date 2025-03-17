@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 package x25519
 
 import "github.com/cloudflare/circl/math/fp25519"

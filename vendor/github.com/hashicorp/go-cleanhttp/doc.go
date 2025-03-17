@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 // Package cleanhttp offers convenience utilities for acquiring "clean"
 // http.Transport and http.Client structs.
 //

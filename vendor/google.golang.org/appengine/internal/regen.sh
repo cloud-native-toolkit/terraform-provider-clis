@@ -1,4 +1,7 @@
 #!/bin/bash -e
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MIT
+
 #
 # This script rebuilds the generated code for the protocol buffers.
 # To run this you will need protoc and goprotobuf installed;

@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 package goldilocks
 
 import fp "github.com/cloudflare/circl/math/fp448"

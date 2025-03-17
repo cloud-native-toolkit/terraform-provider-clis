@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 package textseg
 
 //go:generate go run make_tables.go -output tables.go

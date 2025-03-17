@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 // Built-in base types for API calls. Primarily useful as return types.
 
 syntax = "proto2";
