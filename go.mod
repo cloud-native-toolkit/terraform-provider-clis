@@ -3,7 +3,7 @@
 
 module github.com/cloud-native-toolkit/terraform-provider-clis
 
-go 1.23.4
+go 1.23
 
 require (
 	github.com/hashicorp/terraform-plugin-framework v1.13.0
