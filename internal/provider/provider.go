@@ -5,7 +5,7 @@ package provider
 
 import (
 	"context"
-	mutexkv "github.com/hashicorp/terraform-provider-scaffolding-framework/internal/mutex"
+	mutexkv "github.com/cloud-native-toolkit/terraform-provider-clis/internal/mutex"
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"

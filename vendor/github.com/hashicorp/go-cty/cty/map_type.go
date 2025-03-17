@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package cty
 
 import (
@@ -63,9 +66,9 @@ func (t Type) IsMapType() bool {
 // otherwise. This is intended to allow convenient conditional branches,
 // like so:
 //
-//     if et := t.MapElementType(); et != nil {
-//         // Do something with *et
-//     }
+//	if et := t.MapElementType(); et != nil {
+//	    // Do something with *et
+//	}
 func (t Type) MapElementType() *Type {
 	if lt, ok := t.typeImpl.(typeMap); ok {
 		return &lt.ElementTypeT

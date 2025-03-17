@@ -1,3 +1,4 @@
+
 name: Verify PR
 
 # Controls when the action will run. Triggers the workflow on push or pull request
@@ -15,9 +16,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.23
+          go-version: 1.19.4
 
       - name: Build
         run: make build
@@ -34,17 +35,17 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.23
+          go-version: 1.19.4
 
       - name: Install
         run: make OS_ARCH=linux_amd64 install
 
       - name: Set up terraform cli
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.9.8
+          terraform_version: 1.2.8
 
       - name: Download backlevel igc
         run: |
@@ -91,9 +92,9 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.23
+          go-version: 1.19.4
 
       - name: Import GPG key
         id: import_gpg

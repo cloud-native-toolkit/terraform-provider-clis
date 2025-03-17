@@ -20,7 +20,7 @@ website/node_modules
 *.bak
 *~
 .*.swp
-.idea
+.idea/
 *.iml
 *.test
 *.iml

@@ -1,6 +1,6 @@
-module github.com/hashicorp/terraform-provider-scaffolding-framework
+module github.com/cloud-native-toolkit/terraform-provider-clis
 
-go 1.22.7
+go 1.23.4
 
 require (
 	github.com/hashicorp/terraform-plugin-framework v1.13.0

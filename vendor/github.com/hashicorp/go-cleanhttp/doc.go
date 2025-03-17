@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // Package cleanhttp offers convenience utilities for acquiring "clean"
 // http.Transport and http.Client structs.
 //
@@ -16,5 +19,4 @@
 // connecting to the same hosts repeatedly from the same client, you can use
 // DefaultPooledClient to receive a client that has connection pooling
 // semantics similar to http.DefaultClient.
-//
 package cleanhttp

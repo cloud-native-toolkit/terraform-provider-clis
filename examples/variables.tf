@@ -1,3 +1,3 @@
-variable bin_dir {
+variable "bin_dir" {
   default = "bin2"
 }
