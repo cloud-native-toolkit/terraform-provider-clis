@@ -7,7 +7,7 @@ install: build
 	go install -v ./...
 
 lint:
-	golangci-lint run --exclude-dirs-use-default --verbose
+	golangci-lint run --verbose
 
 generate:
 	cd tools; go generate ./...
