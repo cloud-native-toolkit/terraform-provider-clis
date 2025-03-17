@@ -102,7 +102,7 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
   verifyAll:
-    needs: [test,verifyReleaser]
+    needs: [generate,test,verifyReleaser]
     runs-on: ubuntu-latest
 
     steps:
