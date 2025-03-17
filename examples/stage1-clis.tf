@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Cloud-Native Toolkit
+# SPDX-License-Identifier: MIT
 
 data "clis_check" "clis" {
   clis = [

@@ -1,5 +1,5 @@
-// Copyright (c) IBM
-// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2025 Cloud-Native Toolkit
+// SPDX-License-Identifier: MIT
 
 package provider
 
@@ -42,7 +42,7 @@ type CliProviderDataSourceModel struct {
 }
 
 func (p *CliProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "cli"
+	resp.TypeName = "clis"
 	resp.Version = p.version
 }
 

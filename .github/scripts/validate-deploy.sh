@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: MPL-2.0
-
+# Copyright (c) 2025 Cloud-Native Toolkit
+# SPDX-License-Identifier: MIT
 
 BIN_DIR=$(cat .bin_dir)
 

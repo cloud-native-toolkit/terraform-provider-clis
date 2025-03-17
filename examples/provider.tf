@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Cloud-Native Toolkit
+# SPDX-License-Identifier: MIT
 
 provider "clis" {
   bin_dir = var.bin_dir

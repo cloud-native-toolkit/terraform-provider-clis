@@ -1,4 +1,4 @@
-# Terraform Provider Gitops
+# Terraform Provider CLIs
 
 Terraform provider to populate a Cloud Native Toolkit gitops repo with a new ArgoCD
 application. Currently, this provider is a simple wrapper for the `gitops-namespace`

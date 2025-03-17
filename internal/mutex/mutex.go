@@ -1,5 +1,5 @@
-// Copyright (c) IBM
-// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2025 Cloud-Native Toolkit
+// SPDX-License-Identifier: MIT
 
 package mutexkv
 

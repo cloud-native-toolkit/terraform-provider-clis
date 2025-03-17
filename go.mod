@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Cloud-Native Toolkit
+// SPDX-License-Identifier: MIT
+
 module github.com/cloud-native-toolkit/terraform-provider-clis
 
 go 1.23.4

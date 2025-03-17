@@ -1,5 +1,5 @@
-// Copyright (c) IBM
-// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2025 Cloud-Native Toolkit
+// SPDX-License-Identifier: MIT
 
 //go:build generate
 
@@ -19,4 +19,4 @@ import (
 //go:generate terraform fmt -recursive ../examples/
 
 // Generate documentation.
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-dir .. -provider-name terraform-provider-clis --examples-dir ../examples
+//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-dir .. -provider-name terraform-provider-clis
