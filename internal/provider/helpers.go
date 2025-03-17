@@ -33,12 +33,20 @@ func (c EnvContext) isAlpine() bool {
 	return c.Alpine
 }
 
-func listTypeToStrings(list types.ListType) []string {
+func listTypeToStrings(list types.List) []string {
 
 	// Create a slice of strings to hold the values
 	stringArray := make([]string, 0)
 
-	// TODO implement
+	// Append the values into the slice
+	for _, v := range list.Elements() {
+		if !v.IsNull() && !v.IsUnknown() {
+			s, ok := v.(types.String)
+			if ok {
+				stringArray = append(stringArray, s.ValueString())
+			}
+		}
+	}
 
 	return stringArray
 }
@@ -47,7 +55,7 @@ func typeStringsToStrings(vals ...types.String) []string {
 	stringArray := make([]string, len(vals))
 
 	for i, val := range vals {
-		stringArray[i] = val.String()
+		stringArray[i] = val.ValueString()
 	}
 
 	return stringArray

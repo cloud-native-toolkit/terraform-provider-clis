@@ -24,7 +24,14 @@ func TestAccExampleDataSource(t *testing.T) {
 					statecheck.ExpectKnownValue(
 						"data.clis_check.clis",
 						tfjsonpath.New("id"),
-						knownvalue.StringExact("example-id"),
+						knownvalue.StringExact("clis:yq:jq:igc:kubeseal:oc"),
+					),
+					statecheck.ExpectKnownValue(
+						"data.clis_check.clis",
+						tfjsonpath.New("clis"),
+						knownvalue.ListExact([]knownvalue.Check{
+							knownvalue.StringExact("jq"),
+						}),
 					),
 				},
 			},
@@ -34,6 +41,7 @@ func TestAccExampleDataSource(t *testing.T) {
 
 const testAccExampleDataSourceConfig = `
 data "clis_check" "clis" {
-  clis = "jq"
+  clis = ["jq"]
+  bin_dir = "/tmp/test_bin"
 }
 `

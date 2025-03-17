@@ -4,7 +4,9 @@
 package mutexkv
 
 import (
-	"log"
+	"context"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"sync"
 )
 
@@ -21,17 +23,17 @@ type MutexKV struct {
 
 // Lock - Locks the mutex for the given key. Caller is responsible for calling Unlock
 // for the same key.
-func (m *MutexKV) Lock(key string) {
-	log.Printf("[DEBUG] Locking %q", key)
+func (m *MutexKV) Lock(ctx context.Context, key string) {
+	tflog.Trace(ctx, fmt.Sprintf("Locking %q", key))
 	m.get(key).Lock()
-	log.Printf("[DEBUG] Locked %q", key)
+	tflog.Trace(ctx, fmt.Sprintf("Locked %q", key))
 }
 
 // Unlock - Unlock the mutex for the given key. Caller must have called Lock for the same key first.
-func (m *MutexKV) Unlock(key string) {
-	log.Printf("[DEBUG] Unlocking %q", key)
+func (m *MutexKV) Unlock(ctx context.Context, key string) {
+	tflog.Trace(ctx, fmt.Sprintf("Unlocking %q", key))
 	m.get(key).Unlock()
-	log.Printf("[DEBUG] Unlocked %q", key)
+	tflog.Trace(ctx, fmt.Sprintf("Unlocked %q", key))
 }
 
 // get - Returns a mutex for the given key, no guarantee of its lock status.

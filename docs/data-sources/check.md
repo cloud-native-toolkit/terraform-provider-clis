@@ -19,3 +19,7 @@ Data source to ensure required clis are available
 
 - `bin_dir` (String) The directory where the clis have been installed from the provider bin_dir config.
 - `clis` (List of String) The list of clis that should be installed. Should be any of: jq, igc, yq, helm, argocd, rosa, kubeseal, oc, kustomize, ibmcloud, ibmcloud-is, ibmcloud-ob, ibmcloud-ks, ibmcloud-cr, gitu, gh, glab, openshift-install
+
+### Read-Only
+
+- `id` (String) Identifier

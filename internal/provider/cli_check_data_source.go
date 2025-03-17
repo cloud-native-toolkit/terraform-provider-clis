@@ -47,9 +47,9 @@ type CliCheckDataSource struct {
 
 // CliCheckDataSourceModel describes the data source data model.
 type CliCheckDataSourceModel struct {
-	Id     types.String   `tfsdk:"id"`
-	Clis   types.ListType `tfsdk:"clis"`
-	BinDir types.String   `tfsdk:"bin_dir"`
+	Id     types.String `tfsdk:"id"`
+	Clis   types.List   `tfsdk:"clis"`
+	BinDir types.String `tfsdk:"bin_dir"`
 }
 
 func (d *CliCheckDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -70,6 +70,10 @@ func (d *CliCheckDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 			"bin_dir": schema.StringAttribute{
 				MarkdownDescription: "The directory where the clis have been installed from the provider bin_dir config.",
 				Optional:            true,
+			},
+			"id": schema.StringAttribute{
+				MarkdownDescription: "Identifier",
+				Computed:            true,
 			},
 		},
 	}
@@ -119,6 +123,13 @@ func (d *CliCheckDataSource) Read(ctx context.Context, req datasource.ReadReques
 	defaultClis := []string{"yq", "jq", "igc", "kubeseal", "oc"}
 	clis := unique(append(defaultClis, listTypeToStrings(data.Clis)...))
 
+	tflog.Info(ctx, "Processing clis("+binDir+"): "+strings.Join(clis, ","))
+
+	// Generate the id from the configured clis to save in state
+	data.Id = types.StringValue("clis:" + strings.Join(clis[:], ":"))
+	// Save the binDir into state
+	data.BinDir = types.StringValue(binDir)
+
 	err := addBinDirToPath(binDir)
 	if err != nil {
 		resp.Diagnostics.AddError("Error adding bin directory to path", fmt.Sprintf("Unable to add path, got error: %s", err))
@@ -130,15 +141,6 @@ func (d *CliCheckDataSource) Read(ctx context.Context, req datasource.ReadReques
 			resp.Diagnostics.AddError("Error setting up cli", fmt.Sprintf("Unable to setup cli, got error: %s", err))
 		}
 	}
-
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
-	data.Id = types.StringValue("clis:" + strings.Join(clis[:], ":"))
-	data.BinDir = types.StringValue(binDir)
-
-	// Write logs using the tflog package
-	// Documentation: https://terraform.io/plugin/log
-	tflog.Trace(ctx, "read a data source")
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -240,8 +242,8 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 		version = getDefaultVersions()[cliName]
 	}
 
-	cliMutexKV.Lock(cliName)
-	defer cliMutexKV.Unlock(cliName)
+	cliMutexKV.Lock(ctx, cliName)
+	defer cliMutexKV.Unlock(ctx, cliName)
 
 	err := os.MkdirAll(destDir, os.ModePerm)
 	if err != nil {
@@ -262,16 +264,19 @@ func setupJq(ctx context.Context, destDir string, envContext EnvContext, version
 		return false, nil
 	}
 
-	if envContext.isArmArch() {
-		tflog.Debug(ctx, "ARM not currently supported for jq. Trying amd64")
-	}
+	filename := "jq-linux"
 
-	filename := "jq-linux64"
 	if envContext.isMacOs() {
-		filename = "jq-osx-amd64"
+		filename = "jq-macos"
 	}
 
-	url := fmt.Sprintf("https://github.com/stedolan/jq/releases/download/jq-1.6/%s", filename)
+	if envContext.isArmArch() {
+		filename = filename + "-arm64"
+	} else {
+		filename = filename + "-amd64"
+	}
+
+	url := fmt.Sprintf("https://github.com/jqlang/jq/releases/download/jq-1.7.1/%s", filename)
 
 	return setupBinary(ctx, destDir, cliName, url, []string{"--version"}, version)
 }
