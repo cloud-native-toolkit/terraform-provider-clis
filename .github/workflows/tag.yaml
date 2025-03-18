@@ -38,4 +38,5 @@ jobs:
         with:
           custom_tag: ${{ steps.releaser.outputs.tag_name }}
           create_annotated_tag: true
+          tag_prefix: ""
           github_token: ${{ secrets.TOKEN }}
