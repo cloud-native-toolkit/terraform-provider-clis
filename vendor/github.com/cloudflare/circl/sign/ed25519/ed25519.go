@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 // Package ed25519 implements Ed25519 signature scheme as described in RFC-8032.
 //
 // This package provides optimized implementations of the three signature

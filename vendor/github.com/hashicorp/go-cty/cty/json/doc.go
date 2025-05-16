@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 // Package json provides functions for serializing cty types and values in
 // JSON format, and for decoding them again.
 //
