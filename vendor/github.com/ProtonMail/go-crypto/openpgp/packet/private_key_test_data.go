@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package packet
 
 // Generated with `gpg --export-secret-keys "Test Key 2"`

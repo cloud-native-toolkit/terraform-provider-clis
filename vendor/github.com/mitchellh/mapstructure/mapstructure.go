@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 // Package mapstructure exposes functionality to convert one arbitrary
 // Go type into another, typically to convert a map[string]interface{}
 // into a native Go structure.
