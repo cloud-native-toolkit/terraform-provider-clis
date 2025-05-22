@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package x448
 
 import fp "github.com/cloudflare/circl/math/fp448"

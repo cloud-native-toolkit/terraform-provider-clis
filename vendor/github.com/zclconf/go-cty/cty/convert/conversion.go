@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package convert
 
 import (
@@ -174,12 +171,16 @@ func getConversionKnown(in cty.Type, out cty.Type, unsafe bool) conversion {
 		}
 		if out.IsCapsuleType() {
 			if fn := out.CapsuleOps().ConversionTo; fn != nil {
-				return conversionToCapsule(in, out, fn)
+				if conv := conversionToCapsule(in, out, fn); conv != nil {
+					return conv
+				}
 			}
 		}
 		if in.IsCapsuleType() {
 			if fn := in.CapsuleOps().ConversionFrom; fn != nil {
-				return conversionFromCapsule(in, out, fn)
+				if conv := conversionFromCapsule(in, out, fn); conv != nil {
+					return conv
+				}
 			}
 		}
 		// No conversion operation is available, then.

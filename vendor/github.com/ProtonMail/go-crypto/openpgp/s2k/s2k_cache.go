@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package s2k
 
 // Cache stores keys derived with s2k functions from one passphrase
