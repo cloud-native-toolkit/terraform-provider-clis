@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package set
 
 // Rules represents the operations that define membership for a Set.
@@ -25,6 +22,10 @@ type Rules interface {
 	// though it is *not* required that two values with the same hash value
 	// be equivalent.
 	Equivalent(interface{}, interface{}) bool
+
+	// SameRules returns true if the instance is equivalent to another Rules
+	// instance.
+	SameRules(Rules) bool
 }
 
 // OrderedRules is an extension of Rules that can apply a partial order to

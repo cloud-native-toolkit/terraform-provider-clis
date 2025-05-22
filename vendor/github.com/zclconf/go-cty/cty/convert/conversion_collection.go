@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package convert
 
 import (
@@ -165,7 +162,7 @@ func conversionCollectionToMap(ety cty.Type, conv conversion) conversion {
 			if ety == cty.DynamicPseudoType {
 				return cty.MapValEmpty(val.Type().ElementType()), nil
 			}
-			return cty.MapValEmpty(ety), nil
+			return cty.MapValEmpty(ety.WithoutOptionalAttributesDeep()), nil
 		}
 
 		if ety.IsCollectionType() || ety.IsObjectType() {

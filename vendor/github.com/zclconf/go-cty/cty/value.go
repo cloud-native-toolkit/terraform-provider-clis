@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package cty
 
 // Value represents a value of a particular type, and is the interface by

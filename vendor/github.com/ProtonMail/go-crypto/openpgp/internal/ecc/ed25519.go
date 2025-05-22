@@ -1,10 +1,8 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 // Package ecc implements a generic interface for ECDH, ECDSA, and EdDSA.
 package ecc
 
 import (
+	"bytes"
 	"crypto/subtle"
 	"io"
 
@@ -93,7 +91,14 @@ func (c *ed25519) GenerateEdDSA(rand io.Reader) (pub, priv []byte, err error) {
 }
 
 func getEd25519Sk(publicKey, privateKey []byte) ed25519lib.PrivateKey {
-	return append(privateKey, publicKey...)
+	privateKeyCap, privateKeyLen, publicKeyLen := cap(privateKey), len(privateKey), len(publicKey)
+
+	if privateKeyCap >= privateKeyLen+publicKeyLen &&
+		bytes.Equal(privateKey[privateKeyLen:privateKeyLen+publicKeyLen], publicKey) {
+		return privateKey[:privateKeyLen+publicKeyLen]
+	}
+
+	return append(privateKey[:privateKeyLen:privateKeyLen], publicKey...)
 }
 
 func (c *ed25519) Sign(publicKey, privateKey, message []byte) (sig []byte, err error) {

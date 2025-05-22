@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package sha3
 
 // RC stores the round constants for use in the ι step.

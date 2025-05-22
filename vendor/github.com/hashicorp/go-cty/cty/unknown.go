@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package cty
 
 // unknownType is the placeholder type used for the sigil value representing

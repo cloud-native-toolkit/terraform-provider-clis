@@ -1,11 +1,7 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package packet
 
 import (
 	"io"
-	"io/ioutil"
 )
 
 // Padding type represents a Padding Packet (Tag 21).
@@ -15,7 +11,7 @@ type Padding int
 
 // parse just ignores the padding content.
 func (pad Padding) parse(reader io.Reader) error {
-	_, err := io.CopyN(ioutil.Discard, reader, int64(pad))
+	_, err := io.CopyN(io.Discard, reader, int64(pad))
 	return err
 }
 

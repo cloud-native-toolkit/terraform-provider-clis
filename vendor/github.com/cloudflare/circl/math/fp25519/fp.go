@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 // Package fp25519 provides prime field arithmetic over GF(2^255-19).
 package fp25519
 

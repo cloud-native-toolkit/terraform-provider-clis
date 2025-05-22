@@ -1,6 +1,3 @@
-# Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: MIT
-
 set -ev
 
 if [[ "$1" == "goveralls" ]]; then
