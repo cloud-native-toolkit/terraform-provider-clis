@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package ocb
 
 // Second set of test vectors from https://tools.ietf.org/html/rfc7253
