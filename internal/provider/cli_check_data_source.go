@@ -247,7 +247,7 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 
 	err := os.MkdirAll(destDir, os.ModePerm)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to create directory: %s, %w", destDir, err)
 	}
 
 	setupCli := installers[cliName]
