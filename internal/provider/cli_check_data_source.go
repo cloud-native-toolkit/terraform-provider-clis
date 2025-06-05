@@ -247,7 +247,7 @@ func setupNamedCli(cliName string, ctx context.Context, destDir string, envConte
 
 	err := os.MkdirAll(destDir, os.ModePerm)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to create directory: %s, %w", destDir, err)
 	}
 
 	setupCli := installers[cliName]
@@ -486,7 +486,7 @@ func setupKubeseal(ctx context.Context, destDir string, envContext EnvContext, m
 		return false, err
 	}
 
-	shortRelease := strings.Replace(releaseInfo.TagName, "v", "", -1)
+	shortRelease := strings.ReplaceAll(releaseInfo.TagName, "v", "")
 
 	var osName string
 	if envContext.isMacOs() {
@@ -664,7 +664,7 @@ func setupGh(ctx context.Context, destDir string, envContext EnvContext, minVers
 		return false, err
 	}
 
-	shortRelease := strings.Replace(releaseInfo.TagName, "v", "", -1)
+	shortRelease := strings.ReplaceAll(releaseInfo.TagName, "v", "")
 
 	var osName string
 	if envContext.isMacOs() {
@@ -702,7 +702,7 @@ func setupGlab(ctx context.Context, destDir string, envContext EnvContext, minVe
 		return false, err
 	}
 
-	shortRelease := strings.Replace(releaseInfo.TagName, "v", "", -1)
+	shortRelease := strings.ReplaceAll(releaseInfo.TagName, "v", "")
 
 	var osName string
 	if envContext.isMacOs() {
@@ -772,7 +772,7 @@ func setupIBMCloud(ctx context.Context, destDir string, envContext EnvContext, _
 		return false, err
 	}
 
-	shortRelease := strings.Replace(releaseInfo.TagName, "v", "", -1)
+	shortRelease := strings.ReplaceAll(releaseInfo.TagName, "v", "")
 
 	var osName string
 	if envContext.isMacOs() {
