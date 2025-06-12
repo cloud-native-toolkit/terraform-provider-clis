@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 // Package ecc implements a generic interface for ECDH, ECDSA, and EdDSA.
 package ecc
 
@@ -12,6 +9,8 @@ import (
 	"github.com/ProtonMail/go-crypto/brainpool"
 	"github.com/ProtonMail/go-crypto/openpgp/internal/encoding"
 )
+
+const Curve25519GenName = "Curve25519"
 
 type CurveInfo struct {
 	GenName string
@@ -46,7 +45,7 @@ var Curves = []CurveInfo{
 	},
 	{
 		// Curve25519
-		GenName: "Curve25519",
+		GenName: Curve25519GenName,
 		Oid:     encoding.NewOID([]byte{0x2B, 0x06, 0x01, 0x04, 0x01, 0x97, 0x55, 0x01, 0x05, 0x01}),
 		Curve:   NewCurve25519(),
 	},
@@ -58,7 +57,7 @@ var Curves = []CurveInfo{
 	},
 	{
 		// Ed25519
-		GenName: "Curve25519",
+		GenName: Curve25519GenName,
 		Oid:     encoding.NewOID([]byte{0x2B, 0x06, 0x01, 0x04, 0x01, 0xDA, 0x47, 0x0F, 0x01}),
 		Curve:   NewEd25519(),
 	},
