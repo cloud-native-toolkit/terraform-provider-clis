@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package cty
 
 // Walk visits all of the values in a possibly-complex structure, calling
