@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 // Package logutils augments the standard log package with levels.
 package logutils
 
