@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 // Package sign provides unified interfaces for signature schemes.
 //
 // A register of schemes is available in the package
@@ -110,4 +107,7 @@ var (
 	// ErrContextNotSupported is the error used if a context is not
 	// supported.
 	ErrContextNotSupported = errors.New("context not supported")
+
+	// ErrContextTooLong is the error used if the context string is too long.
+	ErrContextTooLong = errors.New("context string too long")
 )

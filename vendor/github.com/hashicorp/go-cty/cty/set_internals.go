@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package cty
 
 import (
@@ -66,6 +63,17 @@ func (r setRules) Equivalent(v1 interface{}, v2 interface{}) bool {
 	// as non-equivalent. Two unknown values are not equivalent for the
 	// sake of set membership.
 	return eqv.v == true
+}
+
+// SameRules is only true if the other Rules instance is also a setRules struct,
+// and the types are considered equal.
+func (r setRules) SameRules(other set.Rules) bool {
+	rules, ok := other.(setRules)
+	if !ok {
+		return false
+	}
+
+	return r.Type.Equals(rules.Type)
 }
 
 // Less is an implementation of set.OrderedRules so that we can iterate over
