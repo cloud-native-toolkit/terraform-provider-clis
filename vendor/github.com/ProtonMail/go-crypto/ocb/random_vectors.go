@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 // In the test vectors provided by RFC 7253, the "bottom"
 // internal variable, which defines "offset" for the first time, does not
 // exceed 15. However, it can attain values up to 63.
