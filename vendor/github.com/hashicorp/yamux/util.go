@@ -1,12 +1,16 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package yamux
 
 import (
 	"sync"
 	"time"
 )
+
+// Logger is a abstract of *log.Logger
+type Logger interface {
+	Print(v ...interface{})
+	Printf(format string, v ...interface{})
+	Println(v ...interface{})
+}
 
 var (
 	timerPool = &sync.Pool{

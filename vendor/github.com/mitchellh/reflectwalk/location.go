@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package reflectwalk
 
 //go:generate stringer -type=Location location.go
