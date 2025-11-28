@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MIT
-
 package openpgp
 
 const testKey1KeyId uint64 = 0xA34D7E18C20C31BB
